@@ -5,6 +5,8 @@
 	<artifactId>diffbot-java-sdk</artifactId>
 	<packaging>jar</packaging>
 	<version>1.0</version>
+	<name>diffbot-java-sdk</name>
+	<url>https://github.com/vanduynslagerp/diffbot-java-sdk</url>
 	<description>
 		API for http://www.diffbot.com/ services.
     </description>

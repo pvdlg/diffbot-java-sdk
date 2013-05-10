@@ -95,8 +95,8 @@ Future<Frontpage>; fFrontpage = api.batch(new FrontpageRequest("http://theverge.
 Note that this can be done by multiple thread. The DiffbotAPI class is fully thread-safe.
 At this point no call has been done to Diffbot. To obtain the results:
 ```java
-	Article article = fArticle.get();
-	Frontpage frontpage = fFrontpage.get();
+Article article = fArticle.get();
+Frontpage frontpage = fFrontpage.get();
 ```
 
 The first line trigger a batch request that retrieves the results for all the requests added since the last call to `Future#get()`. The second line doesn't need to do any API call as the result was retrieve during the
