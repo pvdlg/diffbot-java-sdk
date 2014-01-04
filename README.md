@@ -162,3 +162,6 @@ The SDK assumes Diffbot answers a batch request with one answer for every sub-re
 ### All API: documentation
 There is no documentation from Diffbot regarding the potential error message returned by the API. Therefore using the API involves a lot of try and fail to determines what are the potential error messages.
 The SDK try to simplify that by sorting the error in different `Exception` (see javadoc).
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vanduynslagerp/diffbot-java-sdk/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
