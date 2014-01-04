@@ -1,29 +1,28 @@
 /**
- * Copyright (c) 2013 Pierre-Denis Vanduynslager, https://github.com/vanduynslagerp
+ * The MIT License
+ * Copyright (c) ${year} Pierre-Denis Vanduynslager
  *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package com.syncthemall.diffbot.api;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -122,10 +121,7 @@ import com.syncthemall.diffbot.model.frontpage.Frontpage;
  * {@code Future#get()}. The second line doesn't need to do any API call as the result was retrieve during the execution
  * of the fist line.
  */
-public class DiffbotAPI implements Serializable {
-
-	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = -657775976265652256L;
+public class DiffbotAPI {
 
 	protected static final String BATCH_URI = "/api/batch";
 	protected static final String API_SERVER = "http://www.diffbot.com";
@@ -247,7 +243,7 @@ public class DiffbotAPI implements Serializable {
 				GenericJson error = response.parseAs(GenericJson.class);
 
 				BigDecimal errorCode = (BigDecimal) error.get("statusCode");
-				throw new DiffbotAPIException(errorCode.intValue(), ((String) error.get("message")));
+				throw new DiffbotAPIException(errorCode.intValue(), (String) error.get("message"));
 			}
 			return (Frontpage) createUnmarshaller().unmarshal(response.getContent());
 		} catch (JAXBException e) {
@@ -355,7 +351,7 @@ public class DiffbotAPI implements Serializable {
 						GenericJson error = jsonFactory.createJsonParser(responseContent).parseAndClose(
 								GenericJson.class, null);
 						BigDecimal errorCode = (BigDecimal) error.get("statusCode");
-						throw new DiffbotAPIException(errorCode.intValue(), ((String) error.get("message")));
+						throw new DiffbotAPIException(errorCode.intValue(), (String) error.get("message"));
 					}
 					Frontpage frontpage = (Frontpage) createUnmarshaller().unmarshal(new StringReader(responseContent));
 					results.get(i).setResult(frontpage).setExecuted(true);
@@ -379,6 +375,7 @@ public class DiffbotAPI implements Serializable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private BatchResponse[] executeBatchRequest(@SuppressWarnings("rawtypes") final List<Future> futureRequests)
 			throws DiffbotUnauthorizedException, DiffbotServerException, DiffbotIOException {
 		List<BatchRequest> requests = new ArrayList<BatchRequest>();
