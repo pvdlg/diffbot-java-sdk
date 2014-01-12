@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@ package com.syncthemall.diffbot.exception;
 
 /**
  * Wraps an IOExceptions when using the SDK, typically resulting from network-related issues.
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public class DiffbotIOException extends DiffbotException {
 

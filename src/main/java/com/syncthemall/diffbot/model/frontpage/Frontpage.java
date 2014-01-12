@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,15 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.syncthemall.diffbot.model.Model;
+
 /**
  * The result of a front page extraction by Diffbot (Frontpage API).
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 @XmlRootElement(name = "dml")
-public final class Frontpage implements Serializable {
+public final class Frontpage extends Model implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 7531133216091403402L;

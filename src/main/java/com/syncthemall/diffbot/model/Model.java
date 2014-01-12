@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,40 +20,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.model.article;
+package com.syncthemall.diffbot.model;
 
-import java.io.Serializable;
-
-import com.google.api.client.util.Key;
+import com.google.api.client.json.GenericJson;
 
 /**
- * Comments information extracted from an article by Diffbot (Article API).
+ * Base class for {@code Diffbot} results.
+ *
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Comments implements Serializable {
+public abstract class Model extends GenericJson {
 
-	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 2596090388758412860L;
-
-	@Key
-	private int count;
-
-	/**
-	 * Default constructor.
-	 */
-	public Comments() {
-		super();
-	}
-
-	@Override
-	public String toString() {
-		return String.format("Comments [count=%s]", count);
-	}
-
-	/**
-	 * @return the comments counts of the extracted article
-	 */
-	public int getCount() {
-		return count;
-	}
-
+	
 }

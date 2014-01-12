@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@ import com.google.api.client.util.Key;
 
 /**
  * Sub-request of a batch request. Used to serialize the subrequest to JSON.
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public final class BatchRequest implements Serializable {
 
@@ -39,13 +41,6 @@ public final class BatchRequest implements Serializable {
 
 	@Key(value = "relative_url")
 	private String relativeUrl;
-
-	/**
-	 * Default constructor.
-	 */
-	public BatchRequest() {
-		super();
-	}
 
 	/**
 	 * @param method method used to request the Diffbot API for this sub-request. Either 'GET' or 'POST'.

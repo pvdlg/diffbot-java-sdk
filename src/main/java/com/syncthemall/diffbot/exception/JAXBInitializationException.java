@@ -20,41 +20,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/**
+ * 
+ */
 package com.syncthemall.diffbot.exception;
 
+
 /**
- * Thrown when a response from Diffbot (JSON or DML) is not conform and cannot be parsed.
+ * <em>Unchecked exceptions</em> Exception indicating JAXB Unmarshaller cannot be instantiated.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class DiffbotParseException extends DiffbotException {
+public final class JAXBInitializationException extends RuntimeException {
 
-	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 2040619558192686103L;
+	private static final long serialVersionUID = -745314206940896696L;
+	private static final String MESSAGE = "Cannot instantiate a JAXB Unmarshaller. Please verify that JAXB API is in the classpath";
 
 	/**
-	 * Constructs a new exception with the specified detail message and cause.
-	 * <p>
-	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
-	 * exception's detail message.
+	 * Constructs a new {@code MissingResourceException} with a default detail message.
 	 * 
-	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
 	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
-	public DiffbotParseException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
-
-	/**
-	 * Constructs a new exception with the specified detail message. The cause is not initialized, and may subsequently
-	 * be initialized by a call to {@link #initCause}.
-	 * 
-	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
-	 *            method.
-	 */
-	public DiffbotParseException(final String message) {
-		super(message);
+	public JAXBInitializationException(final Throwable cause) {
+		super(MESSAGE, cause);
 	}
 
 }

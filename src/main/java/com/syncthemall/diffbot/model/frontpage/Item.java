@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,8 @@ import com.syncthemall.diffbot.converter.DateXmlAdapter;
 
 /**
  * Element extracted from a front page by Diffbot (Frontpage API).
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public final class Item implements Serializable {
@@ -169,7 +171,11 @@ public final class Item implements Serializable {
 	 * @return the publication date of the item
 	 */
 	public Date getPubDate() {
-		return pubDate;
+		if (pubDate == null) {
+			return null;
+		} else {
+			return new Date(pubDate.getTime());
+		}
 	}
 
 	/**
@@ -253,7 +259,11 @@ public final class Item implements Serializable {
 	 * @param pubDate the publication date of the item
 	 */
 	public void setPubDate(final Date pubDate) {
-		this.pubDate = pubDate;
+		if (pubDate == null) {
+			this.pubDate = null;
+		} else {
+			this.pubDate = new Date(pubDate.getTime());
+		}
 	}
 
 	/**

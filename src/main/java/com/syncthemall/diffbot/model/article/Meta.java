@@ -28,49 +28,73 @@ import com.google.api.client.util.Key;
 import com.syncthemall.diffbot.model.Model;
 
 /**
- * Superclass for {@link Video} and {@link Image} elements extracted from an {@link Article} by Diffbot (Article API).
+ * Meta information extracted from an {@link Article} by Diffbot (Article API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public abstract class Media extends Model implements Serializable {
+public final class Meta extends Model implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 7744306540133027033L;
+	private static final long serialVersionUID = -3043119813174203709L;
+	
 	@Key
-	private String url;
+	private String viewport;
+	@Key(value = "application-name")
+	private String applicationName;
 	@Key
-	private boolean primary;
+	private String title;
 	@Key
-	private int pixelHeight;
+	private OpenGraph og;
 	@Key
-	private int pixelWidth;
-
+	private Twitter twitter;
+	
 	/**
-	 * @return the url of the media
+	 * @return the viewport value meta tag
 	 */
-	public final String getUrl() {
-		return url;
+	public String getViewport() {
+		return viewport;
+	}
+	
+	/**
+	 * @return the application-name value meta tag
+	 */
+	public String getApplicationName() {
+		return applicationName;
 	}
 
 	/**
-	 * @return true if this media is the primary one of the extracted article
+	 * @return the title value meta tag
 	 */
-	public final boolean isPrimary() {
-		return primary;
+	public String getTitle() {
+		return title;
 	}
 
 	/**
-	 * @return media height, in pixels.
+	 * @return the Open Graph set of meta tags
+	 * @see <a href="http://ogp.me">OpenGraph tags</a>
 	 */
-	public final Integer getPixelHeight() {
-		return pixelHeight;
+	public OpenGraph getOg() {
+		return og;
 	}
 
 	/**
-	 * @return media width, in pixels.
+	 * @return the Twitter set of meta tags
+	 * @see <a href="https://dev.twitter.com/docs/cards/markup-reference">Twitter Card metadata</a>
 	 */
-	public final Integer getPixelWidth() {
-		return pixelWidth;
+	public Twitter getTwitter() {
+		return twitter;
+	}
+
+	/**
+	 * Default constructor.
+	 */
+	public Meta() {
+		super();
+	}
+
+	@Override
+	public String toString() {
+		return "Meta - " + super.toString();
 	}
 
 }

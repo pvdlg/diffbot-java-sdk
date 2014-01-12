@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@ package com.syncthemall.diffbot.exception;
  * 
  * @see <a href="http://www.diffbot.com/our-apis/article">Diffbot Aticle API documentation</a>
  * @see <a href="http://www.diffbot.com/our-apis/frontpage">Diffbot Fontpage API documentation</a>
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public class DiffbotAPIException extends DiffbotException {
 

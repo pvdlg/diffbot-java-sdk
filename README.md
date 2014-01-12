@@ -22,7 +22,7 @@ The easiest way to incorporate the SDK into your Java project is to use Maven. S
 <dependency>
     <groupId>com.syncthemall</groupId>
 	<artifactId>diffbot-java-sdk</artifactId>
-	<version>1.0</version>
+	<version>1.1.0</version>
 </dependency>
 ```
 
@@ -33,7 +33,7 @@ In order to uses [URL Fetch](https://developers.google.com/appengine/docs/java/u
 <dependency>
 	<groupId>com.google.http-client</groupId>
 	<artifactId>google-http-client-appengine</artifactId>
-	<version>1.14.1-beta</version>
+	<version>1.17.0-rc</version>
 </dependency>
 ```
 
@@ -42,7 +42,7 @@ In order to uses [Gson](https://code.google.com/p/google-gson/) as your JSON par
 <dependency>
 	<groupId>com.google.http-client</groupId>
 	<artifactId>google-http-client-gson</artifactId>
-	<version>1.14.1-beta</version>
+	<version>1.17.0-rc</version>
 </dependency>
 ```
 
@@ -51,7 +51,7 @@ In order to uses [Jackson 2](http://jackson.codehaus.org/) as your JSON parser a
 <dependency>
 	<groupId>com.google.http-client</groupId>
 	<artifactId>google-http-client-jackson2</artifactId>
-	<version>1.14.1-beta</version>
+	<version>1.17.0-rc</version>
 </dependency>
 ```
 In order to uses [Apache HTTP Client](http://hc.apache.org/) or the default JVM HTTP client, no addition are necessary.
@@ -59,24 +59,24 @@ In order to uses [Apache HTTP Client](http://hc.apache.org/) or the default JVM 
 Usage
 -----
 ### Instantiate the API main class
-The `DiffbotAPI` class is thread-safe and should be instantiated only once. If the batch API is used it **has to** be instantiated only once as it store the list request to execute in a batch.
+The `Diffbot` class is thread-safe and should be instantiated only once. If the batch API is used it **has to** be instantiated only once as it store the list request to execute in a batch.
 
 For example if you use [Apache HTTP Client](http://hc.apache.org/) and [Jackson 2](http://jackson.codehaus.org/):
 ```java
-	private static DiffbotAPI api;
+	private static Diffbot diffbot;
 	...
-	api = new DiffbotAPI(new ApacheHttpTransport(), new JacksonFactory(), "<your_dev_token>");
+	diffbot = new Diffbot(new ApacheHttpTransport(), new JacksonFactory(), "<your_dev_token>");
 ```
 
 ### Direct API calls
 To call the Article API:
 ```java
-Article article = api.article(new ArticleRequest("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461/").withTags().withComments().withSummary());
+Article article = api.articles().get("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461/").withTags().withComments().withSummary().execute();
 ```
 
 To call the Frontpage API:
 ```java
-Frontpage frontpage = api.frontpage(new FrontpageRequest("http://theverge.com"));
+Frontpage frontpage = api.frontpages().get("http://theverge.com").execute();
 ```
 
 ### Batch API
@@ -88,11 +88,11 @@ The batch API allows to prepare multiple Article and/or Frontpage request and to
 
 To prepare requests to be executed in batch:
 ```java
-Future<Article> fArticle = api.batch(new ArticleRequest("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461").withTags().withComments().withSummary());
-Future<Frontpage>; fFrontpage = api.batch(new FrontpageRequest("http://theverge.com"));
+Future<Article> fArticle = api.articles().get("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461").withTags().withComments().withSummary().queue();
+Future<Frontpage>; fFrontpage = api.frontpages().get("http://theverge.com").queue();
 ```
 
-Note that this can be done by multiple thread. The DiffbotAPI class is fully thread-safe.
+Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
 At this point no call has been done to Diffbot. To obtain the results:
 ```java
 Article article = fArticle.get();
@@ -102,6 +102,20 @@ Frontpage frontpage = fFrontpage.get();
 The first line trigger a batch request that retrieves the results for all the requests added since the last call to `Future#get()`. The second line doesn't need to do any API call as the result was retrieve during the
 execution of the fist line.
 
+Running the JUnit tests
+-----------------------
+In order to run the JUnit test add to your Maven settings.xml
+```xml
+<properties>
+	<diffbot.key>0813abb2bfc05b5ea878e68848861259</diffbot.key>
+</properties>
+```
+
+Change log
+----------
+### 1.1.0
+  * Changed the code structure, inspired and based on Google API libs
+  * Updated to Diffbot Article API v2
 
 How to contribute
 --------------
@@ -146,9 +160,8 @@ In addition, the frontpage API return an JSON message when an error occurs even 
 
 *To workaround this problem the SDK test the content type of the http response. If it's XML it's JSON then the content is mapped to an error object.*
 
-It seems that Diffbot recently changed the error management for the Frontpage API. Now an identical XML is returned no matter if the API encountered an error. The error message is in the title attribute of the XML.
+The error management for the Frontpage API seems inconsistent. When requesting the Frontpage API with a inaccessible URL sometimes Diffbot return avalid XML response with the attribute title = URL, sometimes the title is "404 not found" and sometimes an error 500 is return. All these different cases happens with the same url in parameter.
 Therefore there is no way for the SDK to know if there was an error in the API.
-
 *If an error happens on the API side, a `Frontpage` object will be return with the error message in the title attribute.*
 
 ### Batch API: Matching request and results
@@ -158,10 +171,6 @@ Diffbot doesn't provide any way to match the sub-request in a batch with the sub
 The SDK assumes Diffbot answers a batch request with one answer for every sub-request and keep the sub-answers in the same order as the sub-requests.
 
 *According the tests done that's the way Diffbot works, it preserve the order and return one sub-response for every sub-requests.*
-
-### All API: documentation
-There is no documentation from Diffbot regarding the potential error message returned by the API. Therefore using the API involves a lot of try and fail to determines what are the potential error messages.
-The SDK try to simplify that by sorting the error in different `Exception` (see javadoc).
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vanduynslagerp/diffbot-java-sdk/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 

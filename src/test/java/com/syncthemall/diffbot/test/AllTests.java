@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,32 +20,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.api;
+/**
+ * 
+ */
+package com.syncthemall.diffbot.test;
 
-import com.syncthemall.diffbot.model.frontpage.Frontpage;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * Allows to create a request to the Diffbot Frontpage API.
+ * Test suite dor diffbot-java-sdk.
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class FrontpageRequest extends Request {
+@RunWith(Suite.class)
+@SuiteClasses({ InitializeTest.class, ArticleTest.class, FrontpageTest.class, BatchTest.class })
+public final class AllTests {
 
-	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = -7762898255387814976L;
-
-	/**
-	 * Creates a {@code Request} to extract the elements of a front page.
-	 * 
-	 * @param url URL to extract the {@link Frontpage} from.
-	 */
-	public FrontpageRequest(final String url) {
-		super(DiffbotAPI.API_SERVER + DiffbotAPI.FRONTPAGE_URI);
-		set("url", url);
-		set("format", "xml");
-	}
-
-	@Override
-	public final ApiType getApiType() {
-		return ApiType.FRONTPAGE;
+	private AllTests() {
+		super();
 	}
 
 }

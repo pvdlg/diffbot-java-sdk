@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,53 +20,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.api;
+package com.syncthemall.diffbot.model.article;
 
 import java.io.Serializable;
-import java.net.URISyntaxException;
 
-import com.google.api.client.http.GenericUrl;
+import com.syncthemall.diffbot.model.Model;
 
 /**
- * Parent class used to creates request to the Diffbot API.
+ * Video elements extracted from an {@link Article} by Diffbot (Article API).
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public abstract class Request extends GenericUrl implements Serializable {
+public final class Video extends Model implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = -398029585831057600L;
+	private static final long serialVersionUID = -5417191387879053422L;
 
-	/**
-	 * Diffbot API type.
-	 */
-	public enum ApiType {
-		/** Article API. **/
-		ARTICLE,
-		/** Frontpage API. **/
-		FRONTPAGE
-	};
-
-	/**
-	 * @return the type of API used by this request.
-	 */
-	public abstract ApiType getApiType();
-
-	/**
-	 * Constructs from an encoded URL.
-	 * 
-	 * <p>
-	 * Any known query parameters with pre-defined fields as data keys will be parsed based on their data type. Any
-	 * unrecognized query parameter will always be parsed as a string.
-	 * </p>
-	 * 
-	 * <p>
-	 * Any {@link URISyntaxException} is wrapped in an {@link IllegalArgumentException}.
-	 * </p>
-	 * 
-	 * @param encodedUrl encoded URL, including any existing query parameters that should be parsed
-	 * @throws IllegalArgumentException if URL has a syntax error
-	 */
-	public Request(final String encodedUrl) {
-		super(encodedUrl);
+	@Override
+	public String toString() {
+		return "Video - " + super.toString();
 	}
-
 }

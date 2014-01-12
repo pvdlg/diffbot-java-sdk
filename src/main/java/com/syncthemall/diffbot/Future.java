@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,9 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.api;
-
-import java.io.Serializable;
+package com.syncthemall.diffbot;
 
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;
@@ -30,6 +28,7 @@ import com.syncthemall.diffbot.exception.DiffbotIOException;
 import com.syncthemall.diffbot.exception.DiffbotParseException;
 import com.syncthemall.diffbot.exception.DiffbotServerException;
 import com.syncthemall.diffbot.exception.DiffbotUnauthorizedException;
+import com.syncthemall.diffbot.model.Model;
 import com.syncthemall.diffbot.model.article.Article;
 import com.syncthemall.diffbot.model.frontpage.Frontpage;
 
@@ -38,45 +37,39 @@ import com.syncthemall.diffbot.model.frontpage.Frontpage;
  * 
  * A {@code Future} contains :
  * <ul>
- * <li>A {@code Request} used to call the Diffbot API and obtain a result</li>
- * <li>A callback reference to the {@code DiffbotAPI} that created this {@code Future}. It is used to trigger the batch
- * API call.</li>
+ * <li>A {@code Request} used to call the Diffbot API and obtain a result. It is also used to trigger the batch
+ * API call</li>
  * <li>A {@code T} result representing the result of the call corresponding to the {@code Request}.</li>
  * <li>A {@code DiffbotException} if the call resulted in an error. If an {@code DiffbotException} exist it will be
  * thrown when trying to access the result.</li>
  * </ul>
  * 
- * @param <T> the type of Diffbot API result, either {@link Article} or {@link Frontpage}
+ * @param <T> the type of Diffbot API result, ie {@link Article} or {@link Frontpage}
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class Future<T extends Object> implements Serializable {
+public class Future<T extends Model> {
 
-	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 6079999701417072567L;
-	private Request request;
-	private T result;
+	private DiffbotRequest<T> request;
+	private Model result;
 	private DiffbotException error;
-
-	private DiffbotAPI callback;
-
 	private boolean executed = false;
 
 	/**
 	 * Default constructor.
 	 * 
 	 * @param request {@code Request} used to call the Diffbot API and obtain a result
-	 * @param callback a reference to the {@code DiffbotAPI} that created this {@code Future}
 	 */
-	protected Future(final Request request, final DiffbotAPI callback) {
+	protected Future(final DiffbotRequest<T> request) {
 		super();
 		this.request = request;
-		this.callback = callback;
 	}
 
-	protected final Request getRequest() {
+	protected final DiffbotRequest<T> getRequest() {
 		return request;
 	}
 
-	protected final Future<T> setResult(final T result) {
+	protected final Future<T> setResult(final Model result) {
 		this.result = result;
 		return this;
 	}
@@ -97,19 +90,17 @@ public class Future<T extends Object> implements Serializable {
 	 * {@code Future}.
 	 * 
 	 * @return the {@code Article} or {@code Frontpage} obtained for this {@code Future}
-	 * @throws DiffbotAPIException
-	 * @throws DiffbotIOException
-	 * @throws DiffbotParseException
-	 * 
 	 * @throws DiffbotUnauthorizedException if the developer token is not recognized or revoked
 	 * @throws DiffbotServerException if a HTTP error occurs on the Diffbot server
 	 * @throws DiffbotIOException if an IO error (usually network related) occur during the API call
 	 * @throws DiffbotAPIException if an API error occur on Diffbot servers while processing the request
+	 * @throws DiffbotException for any other unknown errors. This is also a superclass of all other Diffbot exceptions,
+	 *             so you may want to only catch this exception if not interested in the cause of the error.
 	 */
-	public final T get() throws DiffbotAPIException, DiffbotIOException, DiffbotUnauthorizedException,
-			DiffbotServerException, DiffbotParseException {
+	@SuppressWarnings("unchecked")
+	public final T get() throws DiffbotException {
 		if (!executed) {
-			callback.executeBatch(this);
+			request.runBatch(this);
 		}
 		if (error != null) {
 			if (error instanceof DiffbotAPIException) {
@@ -122,9 +113,11 @@ public class Future<T extends Object> implements Serializable {
 				throw (DiffbotServerException) error;
 			} else if (error instanceof DiffbotUnauthorizedException) {
 				throw (DiffbotUnauthorizedException) error;
+			} else {
+				throw (DiffbotException) error;
 			}
 		}
-		return result;
+		return (T) result;
 	}
 
 }

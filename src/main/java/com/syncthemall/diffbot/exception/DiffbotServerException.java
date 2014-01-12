@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,28 +25,14 @@ package com.syncthemall.diffbot.exception;
 /**
  * Wraps any non-200 HTTP responses from an API call. You'll typically only want to handle a few specific error codes
  * and show some kind of generic error or retry for the rest.
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public class DiffbotServerException extends DiffbotException {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 7905062136219550521L;
 	private final int errorCode;
-
-	/**
-	 * Constructs a new exception with the specified error code, detail message and cause.
-	 * <p>
-	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
-	 * exception's detail message.
-	 * 
-	 * @param errorCode HTTP error code
-	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
-	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
-	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
-	 */
-	public DiffbotServerException(final int errorCode, final String message, final Throwable cause) {
-		super(message, cause);
-		this.errorCode = errorCode;
-	}
 
 	/**
 	 * Constructs a new exception with the specified error code and detail message. The cause is not initialized, and

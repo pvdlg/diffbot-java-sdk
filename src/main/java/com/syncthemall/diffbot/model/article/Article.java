@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,16 @@ package com.syncthemall.diffbot.model.article;
 import java.io.Serializable;
 import java.util.List;
 
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
+import com.syncthemall.diffbot.Diffbot.Articles.Get;
+import com.syncthemall.diffbot.model.Model;
 
 /**
  * The result of an article extraction by Diffbot (Article API).
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Article extends GenericJson implements Serializable {
+public final class Article extends Model implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 7531133216091403402L;
@@ -44,13 +47,13 @@ public final class Article extends GenericJson implements Serializable {
 	@Key
 	private String author;
 	@Key
-	private List<Media> media;
+	private List<Video> videos;
+	@Key
+	private List<Image> images;
 	@Key
 	private String url;
-	@Key
+	@Key(value = "resolved_url")
 	private String resolvedUrl;
-	@Key
-	private String xpath;
 	@Key
 	private String icon;
 	@Key
@@ -60,13 +63,158 @@ public final class Article extends GenericJson implements Serializable {
 	@Key
 	private String summary;
 	@Key
-	private Comments comments;
+	private Categories categories;
+	@Key
+	private String type;
+	@Key
+	private List<String> links;
+	@Key
+	private String humanLanguage;
+	@Key
+	private Meta meta;
+	@Key
+	private int numPages;
 
 	/**
 	 * Default constructor.
 	 */
 	public Article() {
 		super();
+	}
+
+	/**
+	 * @return the plain-text content of the extracted article
+	 */
+	public String getText() {
+		return text;
+	}
+
+	/**
+	 * @return the title of extracted article
+	 */
+	public String getTitle() {
+		return title;
+	}
+
+	/**
+	 * @return the article date (if detected)
+	 */
+	public String getDate() {
+		return date;
+	}
+
+	/**
+	 * @return the article author (if detected)
+	 */
+	public String getAuthor() {
+		return author;
+	}
+
+	/**
+	 * @return the videos items, if detected
+	 */
+	public List<Video> getVideos() {
+		return videos;
+	}
+
+	/**
+	 * @return the images items, if detected
+	 */
+	public List<Image> getImages() {
+		return images;
+	}
+
+	/**
+	 * @return the submitted URL
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @return the resolving URL if it is different from the submitted URL (e.g., link shortening services)
+	 */
+	public String getResolvedUrl() {
+		return resolvedUrl;
+	}
+
+	/**
+	 * @return the article page favicon
+	 */
+	public String getIcon() {
+		return icon;
+	}
+
+	/**
+	 * @return the HTML of the extracted article
+	 */
+	public String getHtml() {
+		return html;
+	}
+
+	/**
+	 * @return the tags of the extracted article (returned if referenced in {@link Get#withFields(String)})
+	 */
+	public String[] getTags() {
+		return (String[]) tags.clone();
+	}
+
+	/**
+	 * @return the summary text of the extracted article
+	 */
+	public String getSummary() {
+		return summary;
+	}
+
+	/**
+	 * @return the categories score of the extracted article (returned if referenced in {@link Get#withFields(String)})
+	 */
+	public Categories getCategories() {
+		return categories;
+	}
+
+	/**
+	 * @return the type of page -- always article
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @return all links (anchor tag href values) found on the page (returned if referenced in
+	 *         {@link Get#withFields(String)})
+	 */
+	public List<String> getLinks() {
+		return links;
+	}
+
+	/**
+	 * @return the (spoken/human) language of the submitted URL, using two-letter ISO 639-1 nomenclature (returned if
+	 *         referenced in {@link Get#withFields(String)})
+	 * @see <a href="http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639-1 nomenclature</a>
+	 */
+	public String getHumanLanguage() {
+		return humanLanguage;
+	}
+
+	/**
+	 * @return the full contents of page meta tags, including sub-arrays for OpenGraph tags, Twitter Card metadata,
+	 *         schema.org microdata, and -- if available -- oEmbed metadata (returned if referenced in
+	 *         {@link Get#withFields(String)})
+	 * @see <a href="https://dev.twitter.com/docs/cards/markup-reference">Twitter Card metadata</a>
+	 * @see <a href="http://ogp.me">OpenGraph tags</a>
+	 * @see <a href="http://www.oembed.com">oEmbed metadata</a>
+	 */
+	public Meta getMeta() {
+		return meta;
+	}
+
+	/**
+	 * @return number of pages automatically concatenated to form the text or html response (By default, Diffbot will
+	 *         automatically concatenate multiple-page articles.)
+	 */
+	public int getNumPages() {
+		return numPages;
 	}
 
 	@Override
@@ -102,97 +250,6 @@ public final class Article extends GenericJson implements Serializable {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * @return the plain-text content of the extracted article
-	 */
-	public String getText() {
-		return text;
-	}
-
-	/**
-	 * @return the title of extracted article
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * @return the article date (if detected)
-	 */
-	public String getDate() {
-		return date;
-	}
-
-	/**
-	 * @return the article author (if detected)
-	 */
-	public String getAuthor() {
-		return author;
-	}
-
-	/**
-	 * @return the media items (images or videos), if detected and extracted
-	 */
-	public List<Media> getMedia() {
-		return media;
-	}
-
-	/**
-	 * @return the submitted URL
-	 */
-	public String getUrl() {
-		return url;
-	}
-
-	/**
-	 * @return the resolving URL if it is different from the submitted URL (e.g., link shortening services)
-	 */
-	public String getResolvedUrl() {
-		return resolvedUrl;
-	}
-
-	/**
-	 * @return the XPath expression identifying the node containing the article contents
-	 */
-	public String getXpath() {
-		return xpath;
-	}
-
-	/**
-	 * @return the article page favicon
-	 */
-	public String getIcon() {
-		return icon;
-	}
-
-	/**
-	 * @return the HTML of the extracted article (returned in place of text if the html parameter is used)
-	 */
-	public String getHtml() {
-		return html;
-	}
-
-	/**
-	 * @return the tags of the extracted article(returned if tags parameter is used)
-	 */
-	public String[] getTags() {
-		return tags;
-	}
-
-	/**
-	 * @return the summary text of the extracted article (returned if summary parameter is used)
-	 */
-	public String getSummary() {
-		return summary;
-	}
-
-	/**
-	 * @return the comments count of the extracted article (returned if comments parameter is used)
-	 */
-	public Comments getComments() {
-		return comments;
 	}
 
 }

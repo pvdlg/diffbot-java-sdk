@@ -20,41 +20,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.exception;
+package com.syncthemall.diffbot.model.article;
+
+import java.io.Serializable;
+
+import com.google.api.client.util.Key;
 
 /**
- * Thrown when a response from Diffbot (JSON or DML) is not conform and cannot be parsed.
+ * Image element extracted from an {@link Article} by Diffbot (Article API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class DiffbotParseException extends DiffbotException {
+public final class Image extends Media implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 2040619558192686103L;
+	private static final long serialVersionUID = 4011356665293136585L;
 
+	@Key
+	private String caption;
+	
 	/**
-	 * Constructs a new exception with the specified detail message and cause.
-	 * <p>
-	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
-	 * exception's detail message.
-	 * 
-	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
-	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
-	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
+	 * Default constructor.
 	 */
-	public DiffbotParseException(final String message, final Throwable cause) {
-		super(message, cause);
+	public Image() {
+		super();
 	}
 
 	/**
-	 * Constructs a new exception with the specified detail message. The cause is not initialized, and may subsequently
-	 * be initialized by a call to {@link #initCause}.
-	 * 
-	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
-	 *            method.
+	 * @return Diffbot-determined best caption for the image, if detected
 	 */
-	public DiffbotParseException(final String message) {
-		super(message);
+	public  String getCaption() {
+		return caption;
 	}
-
+	
+	@Override
+	public String toString() {
+		return "Image - " + super.toString();
+	}
 }

@@ -1,6 +1,6 @@
 /**
  * The MIT License
- * Copyright (c) ${year} Pierre-Denis Vanduynslager
+ * Copyright (c) 2013 Pierre-Denis Vanduynslager
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,29 +22,28 @@
  */
 package com.syncthemall.diffbot.converter;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 /**
  * {@code XmlAdapter} to convert {@code String} from Diffbot Frontpage results to {@code Date}.
+ * 
+ * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public class DateXmlAdapter extends XmlAdapter<String, Date> {
-
-	private static final DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss zzz")
-			.withLocale(Locale.US);
-
+	
+	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+	
 	@Override
-	public final String marshal(final Date v) throws Exception {
-		return dateFormatter.print(v.getTime());
+	public final String marshal(final Date v) {
+		return new SimpleDateFormat(DATE_FORMAT).format(new Date(v.getTime()));
 	}
 
 	@Override
-	public final Date unmarshal(final String v) throws Exception {
-		return dateFormatter.parseDateTime(v).toDate();
+	public final Date unmarshal(final String v) throws ParseException {
+		return new SimpleDateFormat(DATE_FORMAT).parse(v);
 	}
 }
