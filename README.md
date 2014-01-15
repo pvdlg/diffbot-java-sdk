@@ -71,47 +71,27 @@ For example if you use [Apache HTTP Client](http://hc.apache.org/) and [Jackson 
 ### Direct API calls
 To call the Article API:
 ```java
-<<<<<<< HEAD
 Article article = api.articles().analyze("<web page URL>").execute();
-=======
-Article article = api.articles().get("<web page URL>").execute();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 
 To call the Frontpage API:
 ```java
-<<<<<<< HEAD
 Frontpage frontpage = api.frontpages().analyze("<web page URL>").execute();
-=======
-Frontpage frontpage = api.frontpages().get("<web page URL>").execute();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 
 To call the Image API:
 ```java
-<<<<<<< HEAD
 Images images = api.images().analyze("<web page URL>").execute();
-=======
-Images images = api.images().get("<web page URL>").execute();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 
 To call the Product API:
 ```java
-<<<<<<< HEAD
 Products products = api.products().analyze("<web page URL>").execute();
-=======
-Products products = api.products().get("<web page URL>").execute();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 
 To call the Product API:
 ```java
-<<<<<<< HEAD
 Classified classified = api.classifier().analyze("<web page URL>").execute();
-=======
-Classified classified = api.classifier().get("<web page URL>").execute();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 If the Classified resulting object is of type Article, Image or Product it can be parsed as respectively as a corresponding Model:
 ```java
@@ -129,19 +109,11 @@ The batch API allows to prepare multiple Article, Frontpage, Image, Product and/
 
 To prepare requests to be executed in batch:
 ```java
-<<<<<<< HEAD
 Future<Article> fArticle = api.articles().analyze("<web page URL>").withTags().queue();
 Future<Frontpage> fFrontpage = api.frontpages().analyze("<web page URL>").queue();
 Future<Images> fImages = api.images().analyze("<web page URL>").queue();
 Future<Products> fProducts = api.products().analyze("<web page URL>").queue();
 Future<Classified> fClassified = api.classified().analyze("<web page URL>").queue();
-=======
-Future<Article> fArticle = api.articles().get("<web page URL>").withTags().queue();
-Future<Frontpage> fFrontpage = api.frontpages().get("<web page URL>").queue();
-Future<Images> fImages = api.images().get("<web page URL>").queue();
-Future<Products> fProducts = api.products().get("<web page URL>").queue();
-Future<Classified> fClassified = api.classified().get("<web page URL>").queue();
->>>>>>> 169e8e10419e23bbcd4a6ae45baf056b5b6967ce
 ```
 
 Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
