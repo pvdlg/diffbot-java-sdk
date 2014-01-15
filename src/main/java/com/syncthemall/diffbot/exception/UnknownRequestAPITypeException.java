@@ -20,41 +20,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/**
+ * 
+ */
 package com.syncthemall.diffbot.exception;
 
+import java.text.MessageFormat;
+
+import com.syncthemall.diffbot.DiffbotRequest.ApiType;
+
 /**
- * Wraps an IOExceptions when using the SDK, typically resulting from network-related issues.
+ * <em>Unchecked exceptions</em> Exception indicating the batch API has been called with a request of an unknown type.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class DiffbotIOException extends DiffbotException {
+public final class UnknownRequestAPITypeException extends RuntimeException {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 2040619558192686103L;
+	private static final long serialVersionUID = 818642857192650055L;
 
 	/**
-	 * Constructs a new exception with the specified detail message and cause.
-	 * <p>
-	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
-	 * exception's detail message.
-	 * 
-	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
-	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
-	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
-	 */
-	public DiffbotIOException(final String message, final Throwable cause) {
-		super(message, cause);
-	}
-
-	/**
-	 * Constructs a new exception with the specified detail message. The cause is not initialized, and may subsequently
-	 * be initialized by a call to {@link #initCause}.
+	 * Constructs a new {@code UnknownRequestAPITypeException} with a detail message.
 	 * 
 	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
 	 *            method.
+	 * @param requestType the unknown {@code ApiType}
 	 */
-	public DiffbotIOException(final String message) {
-		super(message);
+	public UnknownRequestAPITypeException(final String message, final ApiType requestType) {
+		super(MessageFormat.format(message, requestType));
 	}
 
 }

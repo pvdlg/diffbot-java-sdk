@@ -26,10 +26,53 @@ import com.google.api.client.json.GenericJson;
 
 /**
  * Base class for {@code Diffbot} results.
- *
+ * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 public abstract class Model extends GenericJson {
 
-	
+	/**
+	 * @return the submitted URL
+	 */
+	public abstract String getUrl();
+
+	/**
+	 * @return the type of page
+	 */
+	public abstract PageType getType();
+
+	@Override
+	public final int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
+		result = prime * result + ((getUrl() == null) ? 0 : getUrl().hashCode());
+		return result;
+	}
+
+	@Override
+	public final boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Model)) {
+			return false;
+		}
+		Model other = (Model) obj;
+		if (getType() != other.getType()) {
+			return false;
+		}
+		if (getUrl() == null) {
+			if (other.getUrl() != null) {
+				return false;
+			}
+		} else if (!getUrl().equals(other.getUrl())) {
+			return false;
+		}
+		return true;
+	}
+
 }

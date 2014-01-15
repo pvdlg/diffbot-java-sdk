@@ -20,81 +20,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.model.article;
+package com.syncthemall.diffbot.model.classifier;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.model.Model;
 
 /**
- * Meta information extracted from an {@link Article} by Diffbot (Article API).
+ * Stats elements extracted from an {@link Classified} by Diffbot (Classifier API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Meta extends Model implements Serializable {
+public final class Stats extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = -3043119813174203709L;
-	
+	private static final long serialVersionUID = 6905523540423810798L;
+
 	@Key
-	private String viewport;
-	@Key(value = "application-name")
-	private String applicationName;
+	private float confidence;
+
 	@Key
-	private String title;
-	@Key
-	private OpenGraph og;
-	@Key
-	private Twitter twitter;
-	
+	private Types types;
+
 	/**
-	 * @return the viewport value meta tag
+	 * @return Diffbot confidence in the page classification
 	 */
-	public String getViewport() {
-		return viewport;
-	}
-	
-	/**
-	 * @return the application-name value meta tag
-	 */
-	public String getApplicationName() {
-		return applicationName;
+	public float getConfidence() {
+		return confidence;
 	}
 
 	/**
-	 * @return the title value meta tag
+	 * @return an array of individual page-types and the Diffbot-determined score (likelihood) for each type.
 	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * @return the Open Graph set of meta tags
-	 * @see <a href="http://ogp.me">OpenGraph tags</a>
-	 */
-	public OpenGraph getOg() {
-		return og;
-	}
-
-	/**
-	 * @return the Twitter set of meta tags
-	 * @see <a href="https://dev.twitter.com/docs/cards/markup-reference">Twitter Card metadata</a>
-	 */
-	public Twitter getTwitter() {
-		return twitter;
-	}
-
-	/**
-	 * Default constructor.
-	 */
-	public Meta() {
-		super();
+	public Types getTypes() {
+		return types;
 	}
 
 	@Override
 	public String toString() {
-		return "Meta - " + super.toString();
+		return "Stats - " + super.toString();
 	}
-
 }

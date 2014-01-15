@@ -25,9 +25,12 @@ package com.syncthemall.diffbot.model.article;
 import java.io.Serializable;
 import java.util.List;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.Diffbot.Articles.Get;
+import com.syncthemall.diffbot.Diffbot.Article.Analyze;
+import com.syncthemall.diffbot.model.Meta;
 import com.syncthemall.diffbot.model.Model;
+import com.syncthemall.diffbot.model.PageType;
 
 /**
  * The result of an article extraction by Diffbot (Article API).
@@ -65,7 +68,7 @@ public final class Article extends Model implements Serializable {
 	@Key
 	private Categories categories;
 	@Key
-	private String type;
+	private PageType type;
 	@Key
 	private List<String> links;
 	@Key
@@ -74,12 +77,24 @@ public final class Article extends Model implements Serializable {
 	private Meta meta;
 	@Key
 	private int numPages;
+	@Key
+	private GenericJson querystring;
+	@Key
+	private Comments comments;
 
-	/**
-	 * Default constructor.
-	 */
-	public Article() {
-		super();
+	@Override
+	public PageType getType() {
+		return type;
+	}
+
+	@Override
+	public String getUrl() {
+		return url;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Article [url=%s]", url);
 	}
 
 	/**
@@ -104,7 +119,7 @@ public final class Article extends Model implements Serializable {
 	}
 
 	/**
-	 * @return the article author (if detected)
+	 * @return the article author, if detected
 	 */
 	public String getAuthor() {
 		return author;
@@ -122,13 +137,6 @@ public final class Article extends Model implements Serializable {
 	 */
 	public List<Image> getImages() {
 		return images;
-	}
-
-	/**
-	 * @return the submitted URL
-	 */
-	public String getUrl() {
-		return url;
 	}
 
 	/**
@@ -153,10 +161,13 @@ public final class Article extends Model implements Serializable {
 	}
 
 	/**
-	 * @return the tags of the extracted article (returned if referenced in {@link Get#withFields(String)})
+	 * @return the tags of the extracted article (returned if referenced in {@link Analyze#withFields(String)})
 	 */
 	public String[] getTags() {
-		return (String[]) tags.clone();
+		if (tags != null) {
+			return tags.clone();
+		}
+		return new String[0];
 	}
 
 	/**
@@ -167,22 +178,16 @@ public final class Article extends Model implements Serializable {
 	}
 
 	/**
-	 * @return the categories score of the extracted article (returned if referenced in {@link Get#withFields(String)})
+	 * @return the categories score of the extracted article (returned if referenced in
+	 *         {@link Analyze#withFields(String)})
 	 */
 	public Categories getCategories() {
 		return categories;
 	}
 
 	/**
-	 * @return the type of page -- always article
-	 */
-	public String getType() {
-		return type;
-	}
-
-	/**
 	 * @return all links (anchor tag href values) found on the page (returned if referenced in
-	 *         {@link Get#withFields(String)})
+	 *         {@link Analyze#withFields(String)})
 	 */
 	public List<String> getLinks() {
 		return links;
@@ -190,7 +195,7 @@ public final class Article extends Model implements Serializable {
 
 	/**
 	 * @return the (spoken/human) language of the submitted URL, using two-letter ISO 639-1 nomenclature (returned if
-	 *         referenced in {@link Get#withFields(String)})
+	 *         referenced in {@link Analyze#withFields(String)})
 	 * @see <a href="http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes">ISO 639-1 nomenclature</a>
 	 */
 	public String getHumanLanguage() {
@@ -200,7 +205,7 @@ public final class Article extends Model implements Serializable {
 	/**
 	 * @return the full contents of page meta tags, including sub-arrays for OpenGraph tags, Twitter Card metadata,
 	 *         schema.org microdata, and -- if available -- oEmbed metadata (returned if referenced in
-	 *         {@link Get#withFields(String)})
+	 *         {@link Analyze#withFields(String)})
 	 * @see <a href="https://dev.twitter.com/docs/cards/markup-reference">Twitter Card metadata</a>
 	 * @see <a href="http://ogp.me">OpenGraph tags</a>
 	 * @see <a href="http://www.oembed.com">oEmbed metadata</a>
@@ -217,39 +222,19 @@ public final class Article extends Model implements Serializable {
 		return numPages;
 	}
 
-	@Override
-	public String toString() {
-		return String.format("Article [title=%s]", title);
+	/**
+	 * @return returns the key/value pairs of the URL querystring, if present. Items without a value will be returned as
+	 *         "true." (returned if referenced in {@link Analyze#withFields(String)})
+	 */
+	public GenericJson getQuerystring() {
+		return querystring;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((url == null) ? 0 : url.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof Article)) {
-			return false;
-		}
-		Article other = (Article) obj;
-		if (url == null) {
-			if (other.url != null) {
-				return false;
-			}
-		} else if (!url.equals(other.url)) {
-			return false;
-		}
-		return true;
+	/**
+	 * @return the comments count of the extracted article (returned if comments parameter is used)
+	 */
+	public Comments getComments() {
+		return comments;
 	}
 
 }

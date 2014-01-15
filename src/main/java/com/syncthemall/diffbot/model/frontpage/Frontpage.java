@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.syncthemall.diffbot.model.Model;
+import com.syncthemall.diffbot.model.PageType;
 
 /**
  * The result of a front page extraction by Diffbot (Frontpage API).
@@ -42,9 +43,7 @@ public final class Frontpage extends Model implements Serializable {
 	private static final long serialVersionUID = 7531133216091403402L;
 
 	private long id;
-
 	private List<Item> items;
-
 	private Info info;
 
 	/**
@@ -55,38 +54,21 @@ public final class Frontpage extends Model implements Serializable {
 	}
 
 	@Override
+	public PageType getType() {
+		return PageType.FRONTPAGE;
+	}
+
+	@Override
+	public String getUrl() {
+		if (this.info != null) {
+			return this.info.getSourceURL();
+		}
+		return null;
+	}
+
+	@Override
 	public String toString() {
-		return String.format("Frontpage [title=%s]", info.getTitle());
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((info.getSourceURL() == null) ? 0 : info.getSourceURL().hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (!(obj instanceof Frontpage)) {
-			return false;
-		}
-		Frontpage other = (Frontpage) obj;
-		if (info.getSourceURL() == null) {
-			if (other.info.getSourceURL() != null) {
-				return false;
-			}
-		} else if (!info.getSourceURL().equals(other.info.getSourceURL())) {
-			return false;
-		}
-		return true;
+		return String.format("Frontpage [url=%s]", getUrl());
 	}
 
 	/**

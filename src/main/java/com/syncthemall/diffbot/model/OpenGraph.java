@@ -20,12 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.model.article;
+package com.syncthemall.diffbot.model;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.model.Model;
+import com.syncthemall.diffbot.model.article.Article;
 
 /**
  * Open Graph {@link Meta} information extracted from an {@link Article} by Diffbot (Article API).
@@ -34,7 +35,7 @@ import com.syncthemall.diffbot.model.Model;
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class OpenGraph extends Model implements Serializable {
+public final class OpenGraph extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 5858650905042339573L;
@@ -61,13 +62,16 @@ public final class OpenGraph extends Model implements Serializable {
 	private String localeAlternate;
 	@Key(value = "og:video")
 	private String video;
-
-	/**
-	 * Default constructor.
-	 */
-	public OpenGraph() {
-		super();
-	}
+	@Key(value = "og:longitude")
+	private String longitude;
+	@Key(value = "og:latitude")
+	private String latitude;
+	@Key(value = "og:region")
+	private String region;
+	@Key(value = "og:locality")
+	private String locality;
+	@Key(value = "og:street-address")
+	private String streetAddress;
 
 	/**
 	 * @return the title of your object as it should appear within the graph, e.g., "The Rock"
@@ -146,6 +150,41 @@ public final class OpenGraph extends Model implements Serializable {
 	 */
 	public String getVideo() {
 		return video;
+	}
+
+	/**
+	 * @return the og:longitude value
+	 */
+	public String getLongitude() {
+		return longitude;
+	}
+
+	/**
+	 * @return the og:latitude value
+	 */
+	public String getLatitude() {
+		return latitude;
+	}
+
+	/**
+	 * @return the og:region value
+	 */
+	public String getRegion() {
+		return region;
+	}
+
+	/**
+	 * @return the og:locality value
+	 */
+	public String getLocality() {
+		return locality;
+	}
+
+	/**
+	 * @return the og:street-address value
+	 */
+	public String getStreetAddress() {
+		return streetAddress;
 	}
 
 	@Override

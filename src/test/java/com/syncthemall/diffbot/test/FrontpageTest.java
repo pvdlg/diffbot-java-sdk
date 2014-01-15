@@ -50,10 +50,9 @@ public class FrontpageTest extends DiffbotTest {
 	@Test
 	public final void testWorkingFrontpage() throws DiffbotException {
 
-		Frontpage frontpage = diffbot.frontpages().get(frontpageTestURL).execute();
+		Frontpage frontpage = diffbot.frontpage().analyze(frontpageTestURL).execute();
 
 		assertNotNull("A Frontapge should have been retrieved from the call", frontpage);
-
 		assertNotNull(frontpage.getInfo());
 		assertNotEquals("Frontpage API returned an Info part with 0 items", 0, frontpage.getInfo().getNumItems());
 		assertNotEquals("Frontpage API returned an different source URL than the one in parameter", frontpageTestURL,
@@ -74,7 +73,7 @@ public class FrontpageTest extends DiffbotTest {
 	 */
 	@Test(expected = DiffbotServerException.class)
 	public final void testMalFormedTURL() throws DiffbotException {
-		diffbot.frontpages().get(malFormedTestURL).execute();
+		diffbot.frontpage().analyze(malFormedTestURL).execute();
 	}
 
 	/**
@@ -88,8 +87,8 @@ public class FrontpageTest extends DiffbotTest {
 	@Test
 	public final void testNonExistingURL() throws DiffbotException {
 		try {
-			Frontpage f = diffbot.frontpages().get(nonExixtingTestURL).execute();
-			assertNull("Frontpage API returned items", f.getItems());
+			Frontpage frontpage = diffbot.frontpage().analyze(nonExixtingTestURL).execute();
+			assertNull("Frontpage API shouldn't return items with a non existing URL", frontpage.getItems());
 		} catch (DiffbotServerException e) {
 			// This is expected...sort of
 		}

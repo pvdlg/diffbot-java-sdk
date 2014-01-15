@@ -48,7 +48,25 @@ public class DiffbotServerException extends DiffbotException {
 	}
 
 	/**
-	 * @return the HTTP error associated with the exception
+	 * Constructs a new exception with the specified detail message and cause.
+	 * <p>
+	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
+	 * exception's detail message.
+	 * <p>
+	 * The error code is not initialized and will have the default value 0.
+	 * 
+	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
+	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
+	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
+	 */
+	public DiffbotServerException(final String message, final Throwable cause) {
+		super(message, cause);
+		this.errorCode = 0;
+	}
+
+	/**
+	 * @return the HTTP error associated with the exception or 0 for non HTTP errors (ie impossible to connect to the
+	 *         server or a read timeout)
 	 */
 	public final int getErrorCode() {
 		return errorCode;

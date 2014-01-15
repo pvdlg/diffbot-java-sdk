@@ -25,54 +25,38 @@
  */
 package com.syncthemall.diffbot.test;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotServerException;
-import com.syncthemall.diffbot.model.article.Article;
+import com.syncthemall.diffbot.model.PageType;
+import com.syncthemall.diffbot.model.classifier.Classified;
 
 /**
- * Test for the article API.
+ * Test for the Product API.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class ArticleTest extends DiffbotTest {
+public class ClassifierTest extends DiffbotTest {
 
 	/**
-	 * Test a working case of a article call.
+	 * Test a working case of a product call.
 	 * 
 	 * @throws DiffbotException means the test is failed
 	 */
 	@Test
-	public final void testWorkingArticle() throws DiffbotException {
-		Article article = diffbot.article().analyze(articleTestURL).withFields("*").withTimeout(30000).execute();
-		assertNotNull("An Article should have been retrieved from the call", article);
-		assertNotNull("Article API returned an item with no title", article.getTitle());
-		assertNotNull("Article API returned an item with no text", article.getText());
-		assertNotEquals("An Article should have a hashCodedifferent than 0", 0, article.hashCode());
-	}
+	public final void testWorkingClassifier() throws DiffbotException {
+		Classified classified = diffbot.classifier().analyze(articleTestURL).withFields("*").withStats()
+				.withMode(PageType.ARTICLE).withTimeout(30000).execute();
+		assertNotNull("An Article should have been retrieved from the call", classified.asArticle());
 
-	/**
-	 * Test an article call with a malformed URL. Should throw a {@code DiffbotServerException}.
-	 * 
-	 * @throws DiffbotException means the test is failed
-	 */
-	@Test(expected = DiffbotServerException.class)
-	public final void testMalFormedURL() throws DiffbotException {
-		diffbot.article().analyze(malFormedTestURL).execute();
-	}
+		Classified classified2 = diffbot.classifier().analyze(imageTestURL).withFields("*").withTimeout(30000)
+				.execute();
+		assertNotNull("An Article should have been retrieved from the call", classified2.asImages());
 
-	/**
-	 * Test an article call with a non exixting URL.
-	 * 
-	 * @throws DiffbotException means the test is failed
-	 */
-	@Test(expected = DiffbotServerException.class)
-	public final void testNonExistingURL() throws DiffbotException {
-		diffbot.article().analyze(nonExixtingTestURL).execute();
+		Classified classified3 = diffbot.classifier().analyze(productTestURL).withFields("*").withTimeout(30000)
+				.execute();
+		assertNotNull("An Article should have been retrieved from the call", classified3.asProducts());
 	}
-
 }

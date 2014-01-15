@@ -24,7 +24,6 @@ package com.syncthemall.diffbot;
 
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotIOException;
 import com.syncthemall.diffbot.exception.DiffbotParseException;
 import com.syncthemall.diffbot.exception.DiffbotServerException;
 import com.syncthemall.diffbot.exception.DiffbotUnauthorizedException;
@@ -37,8 +36,8 @@ import com.syncthemall.diffbot.model.frontpage.Frontpage;
  * 
  * A {@code Future} contains :
  * <ul>
- * <li>A {@code Request} used to call the Diffbot API and obtain a result. It is also used to trigger the batch
- * API call</li>
+ * <li>A {@code Request} used to call the Diffbot API and obtain a result. It is also used to trigger the batch API call
+ * </li>
  * <li>A {@code T} result representing the result of the call corresponding to the {@code Request}.</li>
  * <li>A {@code DiffbotException} if the call resulted in an error. If an {@code DiffbotException} exist it will be
  * thrown when trying to access the result.</li>
@@ -84,6 +83,10 @@ public class Future<T extends Model> {
 		return this;
 	}
 
+	protected final boolean isExecuted() {
+		return executed;
+	}
+
 	/**
 	 * If a batch request containing the {@code Request} of this {@code Future} has already been executed, return the
 	 * result obtained. If not, executes the batch request and returns the result for the {@code Request} of this
@@ -92,7 +95,6 @@ public class Future<T extends Model> {
 	 * @return the {@code Article} or {@code Frontpage} obtained for this {@code Future}
 	 * @throws DiffbotUnauthorizedException if the developer token is not recognized or revoked
 	 * @throws DiffbotServerException if a HTTP error occurs on the Diffbot server
-	 * @throws DiffbotIOException if an IO error (usually network related) occur during the API call
 	 * @throws DiffbotAPIException if an API error occur on Diffbot servers while processing the request
 	 * @throws DiffbotException for any other unknown errors. This is also a superclass of all other Diffbot exceptions,
 	 *             so you may want to only catch this exception if not interested in the cause of the error.
@@ -105,16 +107,12 @@ public class Future<T extends Model> {
 		if (error != null) {
 			if (error instanceof DiffbotAPIException) {
 				throw (DiffbotAPIException) error;
-			} else if (error instanceof DiffbotIOException) {
-				throw (DiffbotIOException) error;
 			} else if (error instanceof DiffbotParseException) {
 				throw (DiffbotParseException) error;
 			} else if (error instanceof DiffbotServerException) {
 				throw (DiffbotServerException) error;
 			} else if (error instanceof DiffbotUnauthorizedException) {
 				throw (DiffbotUnauthorizedException) error;
-			} else {
-				throw (DiffbotException) error;
 			}
 		}
 		return (T) result;

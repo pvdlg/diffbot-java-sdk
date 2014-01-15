@@ -53,6 +53,8 @@ public class DiffbotTest {
 	protected static String diffbotAPIURL = "http://diffbot.com";
 	protected static String articleTestURL = "http://www.huffingtonpost.com/2014/01/11/fast-track-trade-democrats_n_4580720.html";
 	protected static String frontpageTestURL = "http://theverge.com";
+	protected static String imageTestURL = "http://static.comicvine.com/uploads/original/11111/111116692/3084359-3578001612-Tony-.jpg";
+	protected static String productTestURL = "http://www.amazon.com/oCOSMO-32-Inch-720p-Glossy-Black/dp/B00A7BGMSQ/ref=sr_1_1?s=electronics&ie=UTF8&qid=1389585115&sr=1-1";
 	protected static String nonExixtingTestURL = "http://a.abc";
 	protected static String malFormedTestURL = "fake url";
 
@@ -61,9 +63,12 @@ public class DiffbotTest {
 
 	/**
 	 * Instanciate a {@link Diffbot}.
+	 * 
+	 * @throws InterruptedException
 	 */
+
 	@Before
-	public final void setUp() {
+	public final void setUp() throws InterruptedException {
 		try {
 			DiffbotTest.diffbot = new Diffbot(httpTransport, jsonFactory, System.getProperty("diffbotApiKey"));
 		} catch (JAXBException e) {
@@ -88,7 +93,6 @@ public class DiffbotTest {
 		HttpURLConnection connection = (HttpURLConnection) new URL(httpUrl).openConnection();
 		connection.setConnectTimeout(timeout);
 		connection.setReadTimeout(timeout);
-		connection.setRequestMethod("HEAD");
 		int responseCode = connection.getResponseCode();
 		return (200 <= responseCode && responseCode <= 399);
 	}

@@ -24,15 +24,15 @@ package com.syncthemall.diffbot.model.article;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.model.Model;
 
 /**
  * Categories element extracted from an {@link Article} by Diffbot (Article API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Categories extends Model implements Serializable {
+public final class Categories extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 2507981859510362861L;
@@ -73,13 +73,6 @@ public final class Categories extends Model implements Serializable {
 	private float weather;
 	@Key(value = "disaster_accident")
 	private float disasterAccident;
-
-	/**
-	 * Default constructor.
-	 */
-	public Categories() {
-		super();
-	}
 
 	/**
 	 * @return score for entertainment_culture

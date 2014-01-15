@@ -60,6 +60,8 @@ public class InitializeTest extends DiffbotTest {
 			assertTrue("The diffbot API URL is not accessible", ping(diffbotAPIURL, 30000));
 			assertTrue("The article test URL is not accessible", ping(articleTestURL, 30000));
 			assertTrue("The frontpage test URL is not accessible", ping(frontpageTestURL, 30000));
+			assertTrue("The image test URL is not accessible", ping(imageTestURL, 30000));
+			assertTrue("The product test URL is not accessible", ping(productTestURL, 30000));
 		} catch (IOException e) {
 			fail("One of the accessible test URL is not accessible.");
 		}
@@ -94,7 +96,7 @@ public class InitializeTest extends DiffbotTest {
 	@Test(expected = DiffbotUnauthorizedException.class)
 	public final void testUnauthorized() throws DiffbotException, JAXBException {
 		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "fake API key");
-		diffbot.articles().get(articleTestURL).execute();
+		diffbot.article().analyze(articleTestURL).execute();
 	}
 
 	/**
@@ -105,8 +107,7 @@ public class InitializeTest extends DiffbotTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public final void testEmptyToken() throws DiffbotException, JAXBException {
-		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "");
-		diffbot.articles().get(articleTestURL).execute();
+		new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "");
 	}
 
 	/**
@@ -118,8 +119,7 @@ public class InitializeTest extends DiffbotTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public final void testNullHttpTransport() throws DiffbotException, JAXBException {
-		Diffbot diffbot = new Diffbot(null, new GsonFactory(), "fake API key");
-		diffbot.articles().get(articleTestURL).execute();
+		new Diffbot(null, new GsonFactory(), "fake API key");
 	}
 
 	/**
@@ -131,8 +131,31 @@ public class InitializeTest extends DiffbotTest {
 	 */
 	@Test(expected = IllegalArgumentException.class)
 	public final void testNullJSonFactory() throws DiffbotException, JAXBException {
-		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), null, "fake API key");
-		diffbot.articles().get(articleTestURL).execute();
+		new Diffbot(new ApacheHttpTransport(), null, "fake API key");
+	}
+
+	/**
+	 * Test to instanciate {@link Diffbot} with a max batch request number > 50. Should throw a
+	 * {@code IllegalArgumentException}.
+	 * 
+	 * @throws DiffbotException means the test is failed
+	 * @throws JAXBException means the test is failed
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public final void testMaxBatchRequest() throws DiffbotException, JAXBException {
+		diffbot.setMaxBatchRequest(51);
+	}
+
+	/**
+	 * Test to instanciate {@link Diffbot} with a max batch request number = 0. Should throw a
+	 * {@code IllegalArgumentException}.
+	 * 
+	 * @throws DiffbotException means the test is failed
+	 * @throws JAXBException means the test is failed
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public final void testMinBatchRequest() throws DiffbotException, JAXBException {
+		diffbot.setMaxBatchRequest(0);
 	}
 
 }

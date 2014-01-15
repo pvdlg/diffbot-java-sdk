@@ -24,15 +24,15 @@ package com.syncthemall.diffbot.model.article;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.model.Model;
 
 /**
  * Superclass for {@link Video} and {@link Image} elements extracted from an {@link Article} by Diffbot (Article API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public abstract class Media extends Model implements Serializable {
+public abstract class Media extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 7744306540133027033L;
@@ -62,14 +62,14 @@ public abstract class Media extends Model implements Serializable {
 	/**
 	 * @return media height, in pixels.
 	 */
-	public final Integer getPixelHeight() {
+	public final int getPixelHeight() {
 		return pixelHeight;
 	}
 
 	/**
 	 * @return media width, in pixels.
 	 */
-	public final Integer getPixelWidth() {
+	public final int getPixelWidth() {
 		return pixelWidth;
 	}
 
