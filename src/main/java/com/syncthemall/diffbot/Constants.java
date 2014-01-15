@@ -33,7 +33,7 @@ package com.syncthemall.diffbot;
 public final class Constants {
 
 	/** User agent. Written in the header of the generated HTML. */
-	public static final String USER_AGENT = "diffbot-java-sdk/1.1.0";
+	public static final String USER_AGENT = "diffbot-java-sdk/1.2.0";
 
 	/** Batch API URL */
 	public static final String BATCH_URL = "http://www.diffbot.com/api/batch";
@@ -49,6 +49,27 @@ public final class Constants {
 
 	/** The attribute {@code batch}. */
 	public static final String BATCH = "batch";
+
+	/** The attribute {@code fields}. */
+	public static final String FIELDS = "fields";
+
+	/** The attribute {@code timeout}. */
+	public static final String TIMEOUT = "timeout";
+
+	/** The attribute {@code url}. */
+	public static final String URL = "url";
+
+	/** The attribute {@code format}. */
+	public static final String FORMAT = "format";
+
+	/** The attribute {@code token}. */
+	public static final String TOKEN = "token";
+
+	/** The attribute {@code mode}. */
+	public static final String MODE = "mode";
+
+	/** The attribute {@code stats}. */
+	public static final String STATS = "stats";
 
 	/** The attribute {@code "application/json"}. */
 	public static final String APPLICATION_JSON = "application/json";

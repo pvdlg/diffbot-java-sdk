@@ -25,7 +25,6 @@
  */
 package com.syncthemall.diffbot.exception;
 
-
 /**
  * <em>Unchecked exceptions</em> Exception indicating JAXB Unmarshaller cannot be instantiated.
  * 
@@ -33,17 +32,19 @@ package com.syncthemall.diffbot.exception;
  */
 public final class JAXBInitializationException extends RuntimeException {
 
+	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = -745314206940896696L;
-	private static final String MESSAGE = "Cannot instantiate a JAXB Unmarshaller. Please verify that JAXB API is in the classpath";
 
 	/**
-	 * Constructs a new {@code MissingResourceException} with a default detail message.
+	 * Constructs a new {@code MissingResourceException} with a detail message.
 	 * 
+	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
+	 *            method.
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
 	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
-	public JAXBInitializationException(final Throwable cause) {
-		super(MESSAGE, cause);
+	public JAXBInitializationException(final String message, final Throwable cause) {
+		super(message, cause);
 	}
 
 }

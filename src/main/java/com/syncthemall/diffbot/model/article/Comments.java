@@ -20,22 +20,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+/**
+ * 
+ */
 package com.syncthemall.diffbot.model.article;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
+import com.google.api.client.util.Key;
+
 /**
- * Video elements extracted from an {@link Article} by Diffbot (Article API).
- * 
- * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
+ * Comments information extracted from an article by Diffbot (Article API).
  */
-public final class Video extends Media implements Serializable {
+public final class Comments extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = -5417191387879053422L;
+	private static final long serialVersionUID = 2596090388758412860L;
+
+	@Key
+	private int count;
+
+	/**
+	 * Default constructor.
+	 */
+	public Comments() {
+		super();
+	}
 
 	@Override
 	public String toString() {
-		return "Video - " + super.toString();
+		return String.format("Comments [count=%s]", count);
 	}
+
+	/**
+	 * @return the comments counts of the extracted article
+	 */
+	public int getCount() {
+		return count;
+	}
+
 }
+

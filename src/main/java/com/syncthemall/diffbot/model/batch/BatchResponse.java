@@ -24,6 +24,7 @@ package com.syncthemall.diffbot.model.batch;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 /**
@@ -31,23 +32,19 @@ import com.google.api.client.util.Key;
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class BatchResponse implements Serializable {
+public final class BatchResponse extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = -675826711458122919L;
 
 	@Key
 	private String body;
-
 	@Key
 	private Header[] headers;
-
-	/**
-	 * Default constructor.
-	 */
-	public BatchResponse() {
-		super();
-	}
+	@Key
+	private int code;
+	@Key(value = "relative_url")
+	private String relativeUrl;
 
 	/**
 	 * Gets the first header with the given name.
@@ -69,10 +66,34 @@ public final class BatchResponse implements Serializable {
 	}
 
 	/**
+	 * @return the {@code Header}s for the this {@code BatchResponse}
+	 */
+	public Header[] getHeaders() {
+		if (headers != null) {
+		return headers.clone();
+		}
+		return new Header[0];
+	}
+
+	/**
 	 * @return the body content of the response
 	 */
 	public String getBody() {
 		return body;
+	}
+
+	/**
+	 * @return HTTP response code
+	 */
+	public int getCode() {
+		return code;
+	}
+
+	/**
+	 * @return the relative URL of the {@code BatchRequest} to witch this {@code BatchResponse} corresponds
+	 */
+	public String getRelativeUrl() {
+		return relativeUrl;
 	}
 
 }

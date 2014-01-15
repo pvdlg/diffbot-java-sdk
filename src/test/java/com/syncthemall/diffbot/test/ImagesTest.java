@@ -25,54 +25,29 @@
  */
 package com.syncthemall.diffbot.test;
 
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotServerException;
-import com.syncthemall.diffbot.model.article.Article;
+import com.syncthemall.diffbot.model.images.Images;
 
 /**
- * Test for the article API.
+ * Test for the image API.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public class ArticleTest extends DiffbotTest {
+public class ImagesTest extends DiffbotTest {
 
 	/**
-	 * Test a working case of a article call.
+	 * Test a working case of a image call.
 	 * 
 	 * @throws DiffbotException means the test is failed
 	 */
 	@Test
-	public final void testWorkingArticle() throws DiffbotException {
-		Article article = diffbot.article().analyze(articleTestURL).withFields("*").withTimeout(30000).execute();
-		assertNotNull("An Article should have been retrieved from the call", article);
-		assertNotNull("Article API returned an item with no title", article.getTitle());
-		assertNotNull("Article API returned an item with no text", article.getText());
-		assertNotEquals("An Article should have a hashCodedifferent than 0", 0, article.hashCode());
-	}
-
-	/**
-	 * Test an article call with a malformed URL. Should throw a {@code DiffbotServerException}.
-	 * 
-	 * @throws DiffbotException means the test is failed
-	 */
-	@Test(expected = DiffbotServerException.class)
-	public final void testMalFormedURL() throws DiffbotException {
-		diffbot.article().analyze(malFormedTestURL).execute();
-	}
-
-	/**
-	 * Test an article call with a non exixting URL.
-	 * 
-	 * @throws DiffbotException means the test is failed
-	 */
-	@Test(expected = DiffbotServerException.class)
-	public final void testNonExistingURL() throws DiffbotException {
-		diffbot.article().analyze(nonExixtingTestURL).execute();
+	public final void testWorkingImage() throws DiffbotException {
+		Images images = diffbot.images().analyze(imageTestURL).withFields("*").withTimeout(30000).execute();
+		assertNotNull("An Images should have been retrieved from the call", images);
 	}
 
 }

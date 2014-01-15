@@ -35,7 +35,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ InitializeTest.class, ArticleTest.class, FrontpageTest.class, BatchTest.class })
+@SuiteClasses({ InitializeTest.class, ArticleTest.class, FrontpageTest.class, ImagesTest.class, ProdutcsTest.class,
+		ClassifierTest.class, BatchTest.class })
 public final class AllTests {
 
 	private AllTests() {

@@ -20,12 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.model.article;
+package com.syncthemall.diffbot.model;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
-import com.syncthemall.diffbot.model.Model;
+import com.syncthemall.diffbot.model.article.Article;
 
 /**
  * Twitter {@link Meta} information extracted from an {@link Article} by Diffbot (Article API).
@@ -34,11 +35,11 @@ import com.syncthemall.diffbot.model.Model;
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Twitter extends Model implements Serializable {
-	
+public final class Twitter extends GenericJson implements Serializable {
+
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = -2053689342457455549L;
-	
+
 	@Key(value = "twitter:card")
 	private String card;
 	@Key(value = "twitter:site")
@@ -105,13 +106,8 @@ public final class Twitter extends Model implements Serializable {
 	private String appUrlGoogleplay;
 	@Key(value = "twitter:account_id")
 	private String accountId;
-
-	/**
-	 * Default constructor.
-	 */
-	public Twitter() {
-		super();
-	}
+	@Key(value = "twitter:user_id")
+	private String userId;
 
 	/**
 	 * @return summary, summary_large_image, photo, gallery, product, app or player
@@ -342,6 +338,13 @@ public final class Twitter extends Model implements Serializable {
 	 */
 	public String getAccountId() {
 		return accountId;
+	}
+
+	/**
+	 * @return user id
+	 */
+	public String getUserId() {
+		return userId;
 	}
 
 	@Override

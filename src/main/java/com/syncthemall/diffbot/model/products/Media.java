@@ -20,34 +20,90 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.syncthemall.diffbot.model.article;
+package com.syncthemall.diffbot.model.products;
 
 import java.io.Serializable;
 
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.util.Key;
 
 /**
- * Image element extracted from an {@link Article} by Diffbot (Article API).
+ * Media element (video or image) extracted from a product by Diffbot {@link Products} by Diffbot (Product API).
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class Image extends Media implements Serializable {
+public final class Media extends GenericJson implements Serializable {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 4011356665293136585L;
-
+	private static final long serialVersionUID = 3985048229156856713L;
+	
+	@Key
+	private String type;
+	@Key
+	private String link;
+	@Key
+	private int height;
+	@Key
+	private int width;
 	@Key
 	private String caption;
+	@Key
+	private boolean primary;
+	@Key
+	private String xpath;
 
 	/**
-	 * @return Diffbot-determined best caption for the image, if detected
+	 * @return true if this media is the primary one of the extracted article
 	 */
-	public  String getCaption() {
-		return caption;
+	public boolean isPrimary() {
+		return primary;
+	}
+
+	/**
+	 * @return media height, in pixels.
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @return media width, in pixels.
+	 */
+	public int getWidth() {
+		return width;
 	}
 	
+	/**
+	 * @return the type of media identified (image or video)
+	 */
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @return direct (fully resolved) link to image or video content
+	 */
+	public String getLink() {
+		return link;
+	}
+
+	/**
+	 * @return the Diffbot-determined best caption for the image
+	 */
+	public String getCaption() {
+		return caption;
+	}
+
+	/**
+	 * @return the full document Xpath to the media item
+	 */
+	public String getXpath() {
+		return xpath;
+	}
+
 	@Override
 	public String toString() {
-		return "Image - " + super.toString();
+		return "Media - " + super.toString();
 	}
+
 }

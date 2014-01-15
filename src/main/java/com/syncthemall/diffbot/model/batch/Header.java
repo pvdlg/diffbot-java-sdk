@@ -42,13 +42,6 @@ public final class Header implements Serializable {
 	@Key
 	private String value;
 
-	/**
-	 * Default constructor.
-	 */
-	public Header() {
-		super();
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;

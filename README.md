@@ -8,7 +8,7 @@ Features
 
   * Support multiple HTTP implementation, including Google App Engine [URL Fetch](https://developers.google.com/appengine/docs/java/urlfetch/), [Apache HTTP Client](http://hc.apache.org/) and the default JVM HTTP client
   * Support multiple JSON parser, including [Gson](https://code.google.com/p/google-gson/) and [Jackson 2](http://jackson.codehaus.org/)
-  * Support the Article API and the Frontpage API
+  * Support the Article API, Frontpage API, Image API, Product API and Clasifier API
   * Support the batch API
   * Published on Maven Central Repository
 
@@ -22,7 +22,7 @@ The easiest way to incorporate the SDK into your Java project is to use Maven. S
 <dependency>
     <groupId>com.syncthemall</groupId>
 	<artifactId>diffbot-java-sdk</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 </dependency>
 ```
 
@@ -71,25 +71,49 @@ For example if you use [Apache HTTP Client](http://hc.apache.org/) and [Jackson 
 ### Direct API calls
 To call the Article API:
 ```java
-Article article = api.articles().get("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461/").withTags().withComments().withSummary().execute();
+Article article = api.articles().analyze("<web page URL>").execute();
 ```
 
 To call the Frontpage API:
 ```java
-Frontpage frontpage = api.frontpages().get("http://theverge.com").execute();
+Frontpage frontpage = api.frontpages().analyze("<web page URL>").execute();
 ```
+
+To call the Image API:
+```java
+Images images = api.images().analyze("<web page URL>").execute();
+```
+
+To call the Product API:
+```java
+Products products = api.products().analyze("<web page URL>").execute();
+```
+
+To call the Product API:
+```java
+Classified classified = api.classifier().analyze("<web page URL>").execute();
+```
+If the Classified resulting object is of type Article, Image or Product it can be parsed as respectively as a corresponding Model:
+```java
+if (classified.getType().equals(PageType.ARTICLE)) {
+	Article article = classified.asArticle();
+}
+ ```
 
 ### Batch API
 
-The batch API allows to prepare multiple Article and/or Frontpage request and to send them all at once. The batch API:
+The batch API allows to prepare multiple Article, Frontpage, Image, Product and/or Classifier request and to send them all at once. The batch API:
  * limits the number of API calls and reduces the network load, by avoiding http overhead for every request
  * slightly improve the performances if a lot of requests are executed
  * limits the usage of the Diffbot quota
 
 To prepare requests to be executed in batch:
 ```java
-Future<Article> fArticle = api.articles().get("http://www.cbs.com/shows/how_i_met_your_mother/barneys_blog/1000461").withTags().withComments().withSummary().queue();
-Future<Frontpage>; fFrontpage = api.frontpages().get("http://theverge.com").queue();
+Future<Article> fArticle = api.articles().analyze("<web page URL>").withTags().queue();
+Future<Frontpage> fFrontpage = api.frontpages().analyze("<web page URL>").queue();
+Future<Images> fImages = api.images().analyze("<web page URL>").queue();
+Future<Products> fProducts = api.products().analyze("<web page URL>").queue();
+Future<Classified> fClassified = api.classified().analyze("<web page URL>").queue();
 ```
 
 Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
@@ -97,6 +121,9 @@ At this point no call has been done to Diffbot. To obtain the results:
 ```java
 Article article = fArticle.get();
 Frontpage frontpage = fFrontpage.get();
+Images images = fImages.get();
+Products products = fProducts.get();
+Classified classified = fClassified.get();
 ```
 
 The first line trigger a batch request that retrieves the results for all the requests added since the last call to `Future#get()`. The second line doesn't need to do any API call as the result was retrieve during the
@@ -113,9 +140,15 @@ In order to run the JUnit test add to your Maven settings.xml
 
 Change log
 ----------
+### 1.2.0
+  * Added Image API
+  * Added Product API
+  * Added Classifier API
+  * Bug fixes in Batch API
+
 ### 1.1.0
   * Changed the code structure, inspired and based on Google API libs
-  * Updated to Diffbot Article API v2
+  * Updated to Article API v2
 
 How to contribute
 --------------
@@ -163,14 +196,6 @@ In addition, the frontpage API return an JSON message when an error occurs even 
 The error management for the Frontpage API seems inconsistent. When requesting the Frontpage API with a inaccessible URL sometimes Diffbot return avalid XML response with the attribute title = URL, sometimes the title is "404 not found" and sometimes an error 500 is return. All these different cases happens with the same url in parameter.
 Therefore there is no way for the SDK to know if there was an error in the API.
 *If an error happens on the API side, a `Frontpage` object will be return with the error message in the title attribute.*
-
-### Batch API: Matching request and results
-The principle of the batch API is to prepare a list of request and execute them all at once in one batch request containing a list of sub-requests.
-The batch API respond with a list of sub-responses, each one corresponding one of the sub-request.
-Diffbot doesn't provide any way to match the sub-request in a batch with the sub-results (like an id shared by a sub-request and a sub-answer).
-The SDK assumes Diffbot answers a batch request with one answer for every sub-request and keep the sub-answers in the same order as the sub-requests.
-
-*According the tests done that's the way Diffbot works, it preserve the order and return one sub-response for every sub-requests.*
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vanduynslagerp/diffbot-java-sdk/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
