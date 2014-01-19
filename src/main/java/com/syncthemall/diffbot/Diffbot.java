@@ -32,6 +32,7 @@ import static com.syncthemall.diffbot.Constants.URL;
 import static com.syncthemall.diffbot.Constants.USER_AGENT;
 
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -142,8 +143,6 @@ import com.syncthemall.diffbot.model.classifier.Classified;
  * Future&lt;Classified&gt; fClassified = diffbot.classifier().analyze(&quot;web page URL&quot;).queue();
  * </pre>
  * <p>
- * Note that this can be done concurrently by multiple threads. The {@code Diffbot} class is fully thread-safe.
- * <p>
  * At this point no call has been done to Diffbot. To obtain the results:
  * 
  * <pre>
@@ -154,9 +153,12 @@ import com.syncthemall.diffbot.model.classifier.Classified;
  * Classified classified = fClassified.get();
  * </pre>
  * 
- * The first line trigger a batch request that retrieves the results for all the requests added since the last call to
- * {@code Future#get()}. The second line doesn't need to do any API call as the result was retrieve during the execution
- * of the fist line.
+ * The first line trigger one or more batch request (depending the concurrentBatchRequest value) that retrieves the
+ * results for up to {@code concurrentBatchRequest * maxBatchRequest} requests added since the last call to
+ * {@code Future#get()}. The second line doesn't need to do any API call if the result was retrieved during the
+ * execution of the fist line.
+ * <p>
+ * Note that this can be done concurrently by multiple threads. The {@code Diffbot} class is fully thread-safe.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
@@ -169,6 +171,7 @@ public class Diffbot {
 	private List<Future<? extends Model>> futures = new ArrayList<Future<? extends Model>>();
 	private int maxBatchRequest = 25;
 	private int batchRequestTimeout = 300000;
+	private int concurrentBatchRequest = 1;
 
 	/**
 	 * Constructor allowing to set the Diffbot developer token and the underlying implementations for the HTTP client
@@ -301,7 +304,9 @@ public class Diffbot {
 			 */
 			protected Analyze(final String url) {
 				super(Diffbot.this, com.syncthemall.diffbot.model.frontpage.Frontpage.class, FRONTPAGE_URI);
-				set(URL, url);
+				set(URL,
+						com.google.api.client.util.Preconditions.checkNotNull(url,
+								MessageFormat.format(bundle.getString("required.parameter.null"), URL)));
 				set(FORMAT, "xml");
 			}
 
@@ -365,7 +370,9 @@ public class Diffbot {
 			 */
 			protected Analyze(final String url) {
 				super(Diffbot.this, com.syncthemall.diffbot.model.article.Article.class, ARTICLE_URI);
-				set(URL, url);
+				set(URL,
+						com.google.api.client.util.Preconditions.checkNotNull(url,
+								MessageFormat.format(bundle.getString("required.parameter.null"), URL)));
 			}
 
 			/**
@@ -380,7 +387,9 @@ public class Diffbot {
 			 * @see <a href="http://www.diffbot.com/dev/docs/article">Diffbot - Article API Documentation</a>
 			 */
 			public final Analyze withFields(final String fields) {
-				set(FIELDS, fields);
+				set(FIELDS,
+						com.google.api.client.util.Preconditions.checkNotNull(fields,
+								MessageFormat.format(bundle.getString("required.parameter.null"), FIELDS)));
 				return this;
 			}
 
@@ -392,7 +401,9 @@ public class Diffbot {
 			 * @return the instance of this request
 			 */
 			public final Analyze withTimeout(final int timeout) {
-				set(TIMEOUT, String.valueOf(timeout));
+				set(TIMEOUT,
+						com.google.api.client.util.Preconditions.checkNotNull(timeout,
+								MessageFormat.format(bundle.getString("required.parameter.null"), TIMEOUT)));
 				setReadTimeout(timeout);
 				return this;
 			}
@@ -457,7 +468,9 @@ public class Diffbot {
 			 */
 			protected Analyze(final String url) {
 				super(Diffbot.this, com.syncthemall.diffbot.model.images.Images.class, IMAGE_URI);
-				set(URL, url);
+				set(URL,
+						com.google.api.client.util.Preconditions.checkNotNull(url,
+								MessageFormat.format(bundle.getString("required.parameter.null"), URL)));
 			}
 
 			/**
@@ -472,7 +485,9 @@ public class Diffbot {
 			 * @see <a href="http://www.diffbot.com/dev/docs/image">Diffbot - Image API Documentation</a>
 			 */
 			public final Analyze withFields(final String fields) {
-				set(FIELDS, fields);
+				set(FIELDS,
+						com.google.api.client.util.Preconditions.checkNotNull(fields,
+								MessageFormat.format(bundle.getString("required.parameter.null"), FIELDS)));
 				return this;
 			}
 
@@ -484,7 +499,9 @@ public class Diffbot {
 			 * @return the instance of this request
 			 */
 			public final Analyze withTimeout(final int timeout) {
-				set(TIMEOUT, String.valueOf(timeout));
+				set(TIMEOUT,
+						com.google.api.client.util.Preconditions.checkNotNull(timeout,
+								MessageFormat.format(bundle.getString("required.parameter.null"), TIMEOUT)));
 				setReadTimeout(timeout);
 				return this;
 			}
@@ -549,7 +566,9 @@ public class Diffbot {
 			 */
 			protected Analyze(final String url) {
 				super(Diffbot.this, com.syncthemall.diffbot.model.products.Products.class, PRODUCT_URI);
-				set(URL, url);
+				set(URL,
+						com.google.api.client.util.Preconditions.checkNotNull(url,
+								MessageFormat.format(bundle.getString("required.parameter.null"), URL)));
 			}
 
 			/**
@@ -564,7 +583,9 @@ public class Diffbot {
 			 * @see <a href="http://www.diffbot.com/dev/docs/product">Diffbot - Product API Documentation</a>
 			 */
 			public final Analyze withFields(final String fields) {
-				set(FIELDS, fields);
+				set(FIELDS,
+						com.google.api.client.util.Preconditions.checkNotNull(fields,
+								MessageFormat.format(bundle.getString("required.parameter.null"), FIELDS)));
 				return this;
 			}
 
@@ -576,7 +597,9 @@ public class Diffbot {
 			 * @return the instance of this request
 			 */
 			public final Analyze withTimeout(final int timeout) {
-				set(TIMEOUT, String.valueOf(timeout));
+				set(TIMEOUT,
+						com.google.api.client.util.Preconditions.checkNotNull(timeout,
+								MessageFormat.format(bundle.getString("required.parameter.null"), TIMEOUT)));
 				setReadTimeout(timeout);
 				return this;
 			}
@@ -641,7 +664,9 @@ public class Diffbot {
 			 */
 			protected Analyze(final String url) {
 				super(Diffbot.this, com.syncthemall.diffbot.model.classifier.Classified.class, CLASSIFIER_URI);
-				set(URL, url);
+				set(URL,
+						com.google.api.client.util.Preconditions.checkNotNull(url,
+								MessageFormat.format(bundle.getString("required.parameter.null"), URL)));
 			}
 
 			/**
@@ -656,7 +681,9 @@ public class Diffbot {
 			 * @see <a href="http://www.diffbot.com/dev/docs/product">Diffbot - Product API Documentation</a>
 			 */
 			public final Analyze withFields(final String fields) {
-				set(FIELDS, fields);
+				set(FIELDS,
+						com.google.api.client.util.Preconditions.checkNotNull(fields,
+								MessageFormat.format(bundle.getString("required.parameter.null"), FIELDS)));
 				return this;
 			}
 
@@ -668,7 +695,9 @@ public class Diffbot {
 			 * @return the instance of this request
 			 */
 			public final Analyze withTimeout(final int timeout) {
-				set(TIMEOUT, String.valueOf(timeout));
+				set(TIMEOUT,
+						com.google.api.client.util.Preconditions.checkNotNull(timeout,
+								MessageFormat.format(bundle.getString("required.parameter.null"), TIMEOUT)));
 				setReadTimeout(timeout);
 				return this;
 			}
@@ -683,7 +712,9 @@ public class Diffbot {
 			 * @return the instance of this request
 			 */
 			public final Analyze withMode(final PageType type) {
-				set(MODE, type.getKey());
+				set(MODE,
+						com.google.api.client.util.Preconditions.checkNotNull(type.getKey(),
+								MessageFormat.format(bundle.getString("required.parameter.null"), MODE)));
 				return this;
 			}
 
@@ -722,10 +753,7 @@ public class Diffbot {
 		this.maxBatchRequest = maxBatchRequest;
 	}
 
-	/**
-	 * @return the timeout of a batch request
-	 */
-	public final int getBatchRequestTimeout() {
+	protected final int getBatchRequestTimeout() {
 		return batchRequestTimeout;
 	}
 
@@ -735,6 +763,30 @@ public class Diffbot {
 	 */
 	public final void setBatchRequestTimeout(final int batchRequestTimeout) {
 		this.batchRequestTimeout = batchRequestTimeout;
+	}
+
+	protected final int getConcurrentBatchRequest() {
+		return concurrentBatchRequest;
+	}
+
+	/**
+	 * Every time {@link Future#get()} is called, the Diffbot batch API will be requested with up to
+	 * {@code maxBatchRequest} sub-requests and up to {@code concurrentBatchRequest} times.<br>
+	 * <p>
+	 * ie : if {@code concurrentBatchRequest} is set to 3 and {@code maxBatchRequest} to 25 and there is 100 sub-request
+	 * in the queue (added with {@link DiffbotRequest#queue()}) then 3 asynchronous http calls will be made to the
+	 * Diffbot API, each one containing 25 sub-requests.<br>
+	 * A total of 75 sub-request will be executed, including the one for the {@link Future#get()} initiator call. The
+	 * remaining 25 sub-request in the queue will be executed when a call to {@link Future#get()} will be made for one
+	 * of them.
+	 * 
+	 * @param concurrentBatchRequest maximum number of concurrent batch requests (minimum 1)
+	 */
+	public final void setConcurrentBatchRequest(final int concurrentBatchRequest) {
+		if (maxBatchRequest < 1) {
+			throw new IllegalArgumentException(bundle.getString("max.concurrent.batch"));
+		}
+		this.concurrentBatchRequest = concurrentBatchRequest;
 	}
 
 }

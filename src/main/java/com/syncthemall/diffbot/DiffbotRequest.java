@@ -22,25 +22,23 @@
  */
 package com.syncthemall.diffbot;
 
-import static com.syncthemall.diffbot.Constants.APPLICATION_JSON;
 import static com.syncthemall.diffbot.Constants.BATCH;
 import static com.syncthemall.diffbot.Constants.BATCH_URL;
-import static com.syncthemall.diffbot.Constants.CONTENT_TYPE;
 import static com.syncthemall.diffbot.Constants.ERROR;
-import static com.syncthemall.diffbot.Constants.ERROR_CODE;
 import static com.syncthemall.diffbot.Constants.GET;
 import static com.syncthemall.diffbot.Constants.HTTP_OK;
 import static com.syncthemall.diffbot.Constants.HTTP_UNAUTHORIZED;
-import static com.syncthemall.diffbot.Constants.MESSAGE;
-import static com.syncthemall.diffbot.Constants.STATUS_CODE;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -54,6 +52,7 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
+import com.syncthemall.diffbot.exception.DiffbotBatchException;
 import com.syncthemall.diffbot.exception.DiffbotException;
 import com.syncthemall.diffbot.exception.DiffbotParseException;
 import com.syncthemall.diffbot.exception.DiffbotServerException;
@@ -76,7 +75,7 @@ import com.syncthemall.diffbot.model.products.Products;
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
+public abstract class DiffbotRequest<T extends Model> {
 
 	private ResourceBundle bundle = ResourceBundle.getBundle("com.syncthemall.diffbot.messages.Messages");
 	private HttpRequestFactory requestFactory;
@@ -84,9 +83,11 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 	private JAXBContext jc;
 	private JsonFactory jsonFactory;
 	private Class<T> responseClass;
-	private int maxBatchRequest = 20;
-	private int batchRequestTimeout = 360000;
+	private int maxBatchRequest;
 	private int readTimeout = 20000;
+	private int batchRequestTimeout;
+	private int concurrentBatchRequest;
+	private GenericUrl url;
 
 	/**
 	 * Diffbot API type.
@@ -112,7 +113,7 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 	 * @param encodedUrl encoded URL, including any existing query parameters that should be parsed
 	 */
 	public DiffbotRequest(final Diffbot client, final Class<T> responseClass, final String encodedUrl) {
-		super(encodedUrl);
+		super();
 		this.requestFactory = client.getRequestFactory();
 		this.jc = client.getJAXBContext();
 		this.jsonFactory = client.getJsonFactory();
@@ -120,12 +121,22 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 		this.responseClass = responseClass;
 		this.maxBatchRequest = client.getMaxBatchRequest();
 		this.batchRequestTimeout = client.getBatchRequestTimeout();
+		this.concurrentBatchRequest = client.getConcurrentBatchRequest();
+		this.url = new GenericUrl(encodedUrl);
 	}
 
 	/**
 	 * @return the type of API used by this request.
 	 */
 	protected abstract ApiType getApiType();
+
+	private String buildRelativeUrl() {
+		return this.url.buildRelativeUrl();
+	}
+
+	protected final GenericUrl set(final String fieldName, final Object value) {
+		return url.set(fieldName, value);
+	}
 
 	/**
 	 * Sends the metadata request to the server and returns the parsed metadata response.
@@ -144,40 +155,26 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 	 */
 	public final T execute() throws DiffbotException {
 		try {
-			HttpRequest request = requestFactory.buildGetRequest(this);
+			HttpRequest request = requestFactory.buildGetRequest(this.url);
 			request.setReadTimeout(readTimeout);
 			HttpResponse response = request.execute();
 			// Specific case for Frontpage has the response is either in JSON (error case) or XML (success case)
 			if (responseClass.equals(Frontpage.class)) {
-				return executeFrontpage(response);
+				return parseFrontpage(response);
 			} else {
-				return executeModel(response);
+				return parseModel(response);
 			}
 		} catch (HttpResponseException e) {
-			if (e.getStatusCode() == HTTP_UNAUTHORIZED) {
-				throw new DiffbotUnauthorizedException(bundle.getString("token.not.authorized"));
-			} else {
-				throw new DiffbotServerException(e.getStatusCode(), e.getStatusMessage());
-			}
+			parseAPIError(e.getStatusCode(), e.getContent());
+			return null;
 		} catch (IOException e) {
 			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private T executeFrontpage(final HttpResponse response) throws DiffbotAPIException, DiffbotParseException,
+	private T parseFrontpage(final HttpResponse response) throws DiffbotAPIException, DiffbotParseException,
 			DiffbotServerException {
-		if (response.getContentType() != null && !response.getContentType().isEmpty()
-				&& response.getContentType().contains(APPLICATION_JSON)) {
-			GenericJson error;
-			try {
-				error = response.parseAs(GenericJson.class);
-				BigDecimal errorCode = (BigDecimal) error.get(STATUS_CODE);
-				throw new DiffbotAPIException(errorCode.intValue(), (String) error.get(MESSAGE));
-			} catch (IOException e) {
-				throw new DiffbotParseException(bundle.getString("frontpage.error.not.parsed"), e);
-			}
-		}
 		try {
 			return (T) createUnmarshaller().unmarshal(response.getContent());
 		} catch (JAXBException e) {
@@ -187,16 +184,9 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private T executeModel(final HttpResponse response) throws DiffbotAPIException, DiffbotParseException {
-		GenericJson result;
+	private T parseModel(final HttpResponse response) throws DiffbotAPIException, DiffbotParseException {
 		try {
-			result = (GenericJson) response.parseAs(responseClass);
-			BigDecimal errorCode = (BigDecimal) result.get(ERROR_CODE);
-			if (errorCode != null) {
-				throw new DiffbotAPIException(errorCode.intValue(), (String) result.get(ERROR));
-			}
-			return (T) result;
+			return response.parseAs(responseClass);
 		} catch (IOException e) {
 			throw new DiffbotParseException(bundle.getString("response.not.parsed"), e);
 		}
@@ -225,12 +215,17 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 	 * sub-requests.</b>
 	 * 
 	 * @param initiator the{@code Future} that initiated the processing of the batch
-	 * @throws DiffbotUnauthorizedException if the developer token is not recognized or revoked
-	 * @throws DiffbotServerException if a HTTP error occurs on the Diffbot server
-	 * @throws DiffbotParseException if the Diffbot response cannot be parsed
+	 * @throws DiffbotBatchException wraps any error that occurs during the batch API call
 	 */
-	protected final void runBatch(final Future<T> initiator) throws DiffbotUnauthorizedException,
-			DiffbotServerException, DiffbotParseException {
+	protected final void runBatch(final Future<T> initiator) throws DiffbotBatchException {
+		if (concurrentBatchRequest > 1) {
+			runAsyncBatch(initiator);
+		} else {
+			runSyncBatch(initiator);
+		}
+	}
+
+	private void runSyncBatch(final Future<T> initiator) throws DiffbotBatchException {
 		if (futures.contains(initiator)) {
 			List<Future<? extends Model>> batchList = new ArrayList<Future<? extends Model>>();
 			synchronized (futures) {
@@ -243,38 +238,127 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 				subList.clear();
 			}
 			try {
-				BatchResponse[] responses = executeBatchRequest(batchList);
-				parseBatchResponses(responses, batchList);
-			} catch (DiffbotUnauthorizedException | DiffbotServerException e) {
+				HttpResponse response = executeBatchRequest(batchList);
+				BatchResponse[] responses = parseBatchResponse(response);
+				parseBatchSubResponses(responses, batchList);
+			} catch (DiffbotUnauthorizedException | DiffbotServerException | DiffbotParseException
+					| DiffbotAPIException e) {
 				synchronized (futures) {
 					futures.addAll(batchList);
 				}
-				throw e;
+				throw new DiffbotBatchException(e);
 			}
 		}
 	}
+	
+	private void runAsyncBatch(final Future<T> initiator) throws DiffbotBatchException {
+		List<List<Future<? extends Model>>> batchCalls = new ArrayList<List<Future<? extends Model>>>();
+		int callsToMake = 0;
+		synchronized (futures) {
+			futures.remove(initiator);
+			int batchSize = (futures.size() > maxBatchRequest - 1) ? maxBatchRequest - 1 : futures.size();
+			List<Future<? extends Model>> subList = futures.subList(0, batchSize);
+			subList.add(initiator);
+			List<Future<? extends Model>> batchList = new ArrayList<Future<? extends Model>>();
+			batchList.addAll(subList);
+			batchCalls.add(batchList);
+			callsToMake++;
+			subList.clear();
+			while (!futures.isEmpty() && callsToMake < concurrentBatchRequest) {
+				batchSize = (futures.size() > maxBatchRequest) ? maxBatchRequest : futures.size();
+				subList = futures.subList(0, batchSize);
+				batchList = new ArrayList<Future<? extends Model>>();
+				batchList.addAll(subList);
+				batchCalls.add(batchList);
+				callsToMake++;
+				subList.clear();
+			}
+		}
 
-	private BatchResponse[] executeBatchRequest(final Collection<Future<? extends Model>> futureRequests)
-			throws DiffbotUnauthorizedException, DiffbotServerException, DiffbotParseException {
+		DiffbotBatchException errorOnInitiator = null;
+		Map<List<Future<? extends Model>>, java.util.concurrent.Future<HttpResponse>> asyncResponses = new HashMap<List<Future<? extends Model>>, java.util.concurrent.Future<HttpResponse>>();
+		for (List<Future<? extends Model>> call : batchCalls) {
+			try {
+				asyncResponses.put(call, executeBatchAsyncRequest(call));
+			} catch (DiffbotServerException | DiffbotParseException e) {
+				synchronized (futures) {
+					futures.addAll(call);
+				}
+				if (call.contains(initiator)) {
+					errorOnInitiator = new DiffbotBatchException(e);
+				}
+			}
+		}
+
+		for (Entry<List<Future<? extends Model>>, java.util.concurrent.Future<HttpResponse>> entry : asyncResponses
+				.entrySet()) {
+			try {
+				BatchResponse[] responses = parseBatchResponse(entry.getValue().get());
+				parseBatchSubResponses(responses, entry.getKey());
+			} catch (DiffbotParseException | InterruptedException e) {
+				synchronized (futures) {
+					futures.addAll(entry.getKey());
+				}
+				if (entry.getKey().contains(initiator)) {
+					errorOnInitiator = new DiffbotBatchException(e);
+				}
+			} catch (ExecutionException e) {
+				synchronized (futures) {
+					futures.addAll(entry.getKey());
+				}
+				if (entry.getKey().contains(initiator)) {
+					if (e.getCause() instanceof HttpResponseException) {
+						try {
+							parseAPIError(((HttpResponseException) e.getCause()).getStatusCode(), ((HttpResponseException) e.getCause()).getContent());
+						} catch (DiffbotUnauthorizedException | DiffbotParseException | DiffbotAPIException e1) {
+							errorOnInitiator = new DiffbotBatchException(e1);
+						}
+					} else {
+						errorOnInitiator = new DiffbotBatchException(e.getCause());
+					}
+				}
+			}
+		}
+		if (errorOnInitiator != null) {
+			throw errorOnInitiator;
+		}
+	}
+
+	private HttpResponse executeBatchRequest(final Collection<Future<? extends Model>> futureRequests)
+			throws DiffbotParseException, DiffbotServerException, DiffbotUnauthorizedException, DiffbotAPIException {
+		try {
+			HttpRequest request = requestFactory.buildPostRequest(buildBatchRequest(futureRequests), null);
+			request.setReadTimeout(batchRequestTimeout);
+			return request.execute();
+		} catch (HttpResponseException e) {
+			parseAPIError(e.getStatusCode(), e.getContent());
+			return null;
+		} catch (IOException e) {
+			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
+		}
+	}
+	
+	private java.util.concurrent.Future<HttpResponse> executeBatchAsyncRequest(
+			final Collection<Future<? extends Model>> futureRequests) throws DiffbotParseException,
+			DiffbotServerException {
+		try {
+			HttpRequest request = requestFactory.buildPostRequest(buildBatchRequest(futureRequests), null);
+			request.setReadTimeout(batchRequestTimeout);
+			return request.executeAsync();
+		} catch (IOException e) {
+			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
+		}
+	}
+	
+	private GenericUrl buildBatchRequest(final Collection<Future<? extends Model>> futureRequests)
+			throws DiffbotParseException {
 		List<BatchRequest> requests = new ArrayList<BatchRequest>();
 		GenericUrl batchUrl = new GenericUrl(BATCH_URL);
 		for (Future<? extends Object> future : futureRequests) {
 			requests.add(new BatchRequest(GET, future.getRequest().buildRelativeUrl()));
 		}
 		batchUrl.set(BATCH, buildBatchQuery(requests));
-		try {
-			HttpRequest request = requestFactory.buildPostRequest(batchUrl, null);
-			request.setReadTimeout(batchRequestTimeout);
-			HttpResponse response = request.execute();
-			if (response.getStatusCode() == HTTP_UNAUTHORIZED) {
-				throw new DiffbotUnauthorizedException(bundle.getString("token.not.authorized"));
-			} else if (response.getStatusCode() != HTTP_OK) {
-				throw new DiffbotServerException(response.getStatusCode(), response.getStatusMessage());
-			}
-			return parseBatchResponse(response);
-		} catch (IOException e) {
-			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
-		}
+		return batchUrl;
 	}
 
 	private String buildBatchQuery(final List<BatchRequest> requests) throws DiffbotParseException {
@@ -285,35 +369,31 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 		}
 	}
 
-	private BatchResponse[] parseBatchResponse(final HttpResponse response) throws DiffbotServerException {
+	private BatchResponse[] parseBatchResponse(final HttpResponse response) throws DiffbotParseException {
 		try {
 			return response.parseAs(BatchResponse[].class);
 		} catch (IOException e) {
-			throw new DiffbotServerException(bundle.getString("response.not.parsed"), e);
+			throw new DiffbotParseException(bundle.getString("response.not.parsed"), e);
 		}
 	}
 
-	private void parseBatchResponses(final BatchResponse[] responses, final List<Future<? extends Model>> results) {
+	private void parseBatchSubResponses(final BatchResponse[] responses, final List<Future<? extends Model>> results) {
 		for (int i = 0; i < responses.length; i++) {
-			String responseContent = responses[i].getBody();
 			for (Future<? extends Model> future : results) {
 				if (future.getRequest().buildRelativeUrl().equals(responses[i].getRelativeUrl())
 						&& !future.isExecuted()) {
 					Future<? extends Model> result = future;
 					try {
 						if (responses[i].getCode() != HTTP_OK) {
-							throw new DiffbotServerException(responses[i].getCode(), responseContent);
-						}
-						if (responses[i].getHeaders().length == 0) {
-							throw new DiffbotParseException(bundle.getString("batch.response.no.header"));
+							throw new DiffbotAPIException(responses[i].getCode(), responses[i].getBody());
 						}
 						if (result.getRequest().getApiType() != ApiType.FRONTPAGE) {
 							parseModelBatchResponses(responses[i], result);
 						} else {
 							parseFrontpageBatchResponses(responses[i], result);
 						}
-					} catch (DiffbotAPIException | DiffbotServerException | DiffbotParseException e) {
-						result.setError(e).setExecuted(true);
+					} catch (DiffbotAPIException | DiffbotParseException e) {
+						result.setError(e);
 					}
 				}
 			}
@@ -322,9 +402,6 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 
 	private void parseModelBatchResponses(final BatchResponse response, final Future<? extends Model> result)
 			throws DiffbotParseException, DiffbotAPIException {
-		if (response.getFirstHeader(CONTENT_TYPE) == null || response.getFirstHeader(CONTENT_TYPE).getValue() == null) {
-			throw new DiffbotParseException(bundle.getString("batch.response.no.contenttype"));
-		}
 		try {
 			Model model;
 			if (result.getRequest().getApiType() == ApiType.ARTICLE) {
@@ -339,11 +416,7 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 				throw new UnknownRequestAPITypeException(bundle.getString("batch.unknow.type"), result.getRequest()
 						.getApiType());
 			}
-			result.setResult(model).setExecuted(true);
-			BigDecimal errorCode = (BigDecimal) model.get(ERROR_CODE);
-			if (errorCode != null) {
-				throw new DiffbotAPIException(errorCode.intValue(), (String) model.get(ERROR));
-			}
+			result.setResult(model);
 		} catch (IOException e) {
 			throw new DiffbotParseException(bundle.getString("model.not.parsed"), e);
 		}
@@ -352,20 +425,10 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 	private void parseFrontpageBatchResponses(final BatchResponse response, final Future<? extends Model> result)
 			throws DiffbotAPIException, DiffbotParseException {
 		try {
-			if (response.getFirstHeader(CONTENT_TYPE) != null
-					&& response.getFirstHeader(CONTENT_TYPE).getValue() != null
-					&& response.getFirstHeader(CONTENT_TYPE).getValue().contains(APPLICATION_JSON)) {
-				GenericJson error = jsonFactory.createJsonParser(response.getBody()).parseAndClose(GenericJson.class,
-						null);
-				BigDecimal errorCode = (BigDecimal) error.get(STATUS_CODE);
-				throw new DiffbotAPIException(errorCode.intValue(), (String) error.get(MESSAGE));
-			}
 			Frontpage frontpage = (Frontpage) createUnmarshaller().unmarshal(new StringReader(response.getBody()));
-			result.setResult(frontpage).setExecuted(true);
+			result.setResult(frontpage);
 		} catch (JAXBException e) {
 			throw new DiffbotParseException(bundle.getString("dml.not.parsed"), e);
-		} catch (IOException e) {
-			throw new DiffbotParseException(bundle.getString("frontpage.error.not.parsed"), e);
 		}
 	}
 
@@ -374,6 +437,20 @@ public abstract class DiffbotRequest<T extends Model> extends GenericUrl {
 			return jc.createUnmarshaller();
 		} catch (JAXBException e) {
 			throw new JAXBInitializationException(bundle.getString("jaxb.not.instanciated"), e);
+		}
+	}
+
+	private void parseAPIError(final int statusCode, final String responseContent) throws DiffbotUnauthorizedException,
+			DiffbotParseException, DiffbotAPIException {
+		if (statusCode == HTTP_UNAUTHORIZED) {
+			throw new DiffbotUnauthorizedException(bundle.getString("token.not.authorized"));
+		} else {
+			try {
+				throw new DiffbotAPIException(statusCode, jsonFactory.createJsonParser(responseContent)
+						.parse(GenericJson.class).get(ERROR).toString());
+			} catch (IOException e) {
+				throw new DiffbotParseException(bundle.getString("error.not.parsed"), e);
+			}
 		}
 	}
 

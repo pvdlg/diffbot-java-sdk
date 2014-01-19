@@ -34,11 +34,16 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
 import org.junit.Test;
 
+import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.syncthemall.diffbot.Diffbot;
 import com.syncthemall.diffbot.Future;
+import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotServerException;
 import com.syncthemall.diffbot.model.article.Article;
 import com.syncthemall.diffbot.model.classifier.Classified;
 import com.syncthemall.diffbot.model.frontpage.Frontpage;
@@ -132,8 +137,9 @@ public class BatchTest extends DiffbotTest {
 		try {
 			malformedFArticle.get();
 			fail("Retrieving the result of an Article malformed request in a the batch results should throw a DiffbotServerException.");
-		} catch (DiffbotServerException e) {
-			// This is expected
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertEquals(e.getMessage(), "Could not connect.");
 		}
 	}
 
@@ -158,8 +164,9 @@ public class BatchTest extends DiffbotTest {
 		try {
 			nonExistingFArticle.get();
 			fail("Retrieving the result of an Article non exixting request in a the batch results should throw a DiffbotServerException.");
-		} catch (DiffbotServerException e) {
-			// This is expected
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertEquals(e.getMessage(), "Could not connect.");
 		}
 	}
 
@@ -185,8 +192,9 @@ public class BatchTest extends DiffbotTest {
 		try {
 			malformedFFrontpage.get();
 			fail("Retrieving the result of an Frontpage malformed request in a the batch results should throw a DiffbotServerException.");
-		} catch (DiffbotServerException e) {
-			// This is expected
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertEquals(e.getMessage(), "Could not connect.");
 		}
 	}
 
@@ -214,8 +222,9 @@ public class BatchTest extends DiffbotTest {
 		try {
 			Frontpage frontpage = malformedFFrontpage.get();
 			assertNull("Frontpage API shouldn't return items with a non existing URL", frontpage.getItems());
-		} catch (DiffbotServerException e) {
-			// This is expected
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertNotNull(e.getMessage());
 		}
 	}
 
@@ -254,5 +263,45 @@ public class BatchTest extends DiffbotTest {
 			assertNotNull("An Article should have been retrieved from the call", future.get());
 		}
 	}
+	
+	/**
+	 * Test a batch call with a number of request larger than the max number allowed with asynchronous calls. The first call to
+	 * {@code Future#get()} should call the batch API twice with the max number of request allowed. The Second call to
+	 * {@code Future#get()} should call the batch API for the remaining requests.
+	 * 
+	 * @throws DiffbotException means the test is failed
+	 * @throws JAXBException 
+	 */
+	@Test
+	public final void testLargeAsynchronousBatch() throws DiffbotException, JAXBException {
+		List<Future<Article>> requests = new ArrayList<Future<Article>>();
+		diffbot.setMaxBatchRequest(5);
+		diffbot.setBatchRequestTimeout(300000);
+		diffbot.setConcurrentBatchRequest(2);
+		
+		
+		for (int i = 0; i < 14; i++) {
+			requests.add(diffbot.article().analyze(articleTestURL).withFields("*").queue());
+		}
+		Future<Frontpage> fFrontpage = diffbot.frontpage().analyze(frontpageTestURL).queue();
 
+		assertEquals(15, diffbot.getFutures().size());
+
+		Article article = requests.get(0).get();
+		
+		assertNotNull("An Article should have been retrieved from the call", article);
+
+		assertEquals("The future list size should be <total requests> - <max batch request> * <concurrent requests>", 5, diffbot.getFutures()
+				.size());
+
+		Frontpage frontpage = fFrontpage.get();
+		assertNotNull("An Frontapge should have been retrieved from the call", frontpage);
+
+		assertEquals("The future list should be empty after a call", 0, diffbot.getFutures().size());
+
+		for (Future<Article> future : requests) {
+			assertNotNull("An Article should have been retrieved from the call", future.get());
+		}
+	}
+		
 }

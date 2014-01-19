@@ -20,34 +20,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * 
- */
 package com.syncthemall.diffbot.exception;
 
-import java.text.MessageFormat;
-
-import com.syncthemall.diffbot.DiffbotRequest.ApiType;
-
 /**
- * <em>Unchecked exceptions</em> Exception indicating the batch API has been called with a request of an unknown type.
+ * Wraps any {@code DiffbotAPIException} for a Batch API call. It's used to differentiate error in the batch request
+ * itself from the error of a sub-request.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */
-public final class UnknownRequestAPITypeException extends RuntimeException {
+public class DiffbotBatchException extends DiffbotException {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
-	private static final long serialVersionUID = 818642857192650055L;
+	private static final long serialVersionUID = 3732579759373158746L;
 
 	/**
-	 * Constructs a new {@code UnknownRequestAPITypeException} with a detail message.
+	 * Constructs a new exception with the specified cause.
 	 * 
-	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
-	 *            method.
-	 * @param requestType the unknown {@code ApiType}
+	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
+	 *            value is permitted, and indicates that the cause is nonexistent or unknown.)
 	 */
-	public UnknownRequestAPITypeException(final String message, final ApiType requestType) {
-		super(MessageFormat.format(message, requestType));
+	public DiffbotBatchException(final Throwable cause) {
+		super(cause);
 	}
 
 }

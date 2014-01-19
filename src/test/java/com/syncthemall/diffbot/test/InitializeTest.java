@@ -41,8 +41,11 @@ import com.google.api.client.http.apache.ApacheHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.syncthemall.diffbot.Diffbot;
+import com.syncthemall.diffbot.Future;
+import com.syncthemall.diffbot.exception.DiffbotBatchException;
 import com.syncthemall.diffbot.exception.DiffbotException;
 import com.syncthemall.diffbot.exception.DiffbotUnauthorizedException;
+import com.syncthemall.diffbot.model.article.Article;
 
 /**
  * Initialization tests.
@@ -98,7 +101,42 @@ public class InitializeTest extends DiffbotTest {
 		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "fake API key");
 		diffbot.article().analyze(articleTestURL).execute();
 	}
+	
+	/**
+	 * Test a call to the batch API with a wrong token. Should throw a {@code DiffbotBatchException}.
+	 * 
+	 * @throws DiffbotException means the test is failed
+	 * @throws JAXBException means the test is failed
+	 */
+	@Test
+	public final void testUnauthorizedBatch() throws DiffbotException, JAXBException {
+		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "fake API key");
+		Future<Article> fArticle = diffbot.article().analyze(articleTestURL).withFields("*").queue();
+		try {
+			fArticle.get();
+		} catch (DiffbotBatchException e) {
+			assertTrue(e.getCause() instanceof DiffbotUnauthorizedException);
+		}
+	}
 
+	/**
+	 * Test a call to the batch API with async call and a wrong token. Should throw a {@code DiffbotBatchException}.
+	 * 
+	 * @throws DiffbotException means the test is failed
+	 * @throws JAXBException means the test is failed
+	 */
+	@Test
+	public final void testUnauthorizedAsyncBatch() throws DiffbotException, JAXBException {
+		Diffbot diffbot = new Diffbot(new ApacheHttpTransport(), new GsonFactory(), "fake API key");
+		diffbot.setConcurrentBatchRequest(3);
+		Future<Article> fArticle = diffbot.article().analyze(articleTestURL).withFields("*").queue();
+		try {
+			fArticle.get();
+		} catch (DiffbotBatchException e) {
+			assertTrue(e.getCause() instanceof DiffbotUnauthorizedException);
+		}
+	}
+	
 	/**
 	 * Test to instanciate {@link Diffbot} with an empty token. Should throw a {@code IllegalArgumentException}.
 	 * 

@@ -30,7 +30,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * Test suite dor diffbot-java-sdk.
+ * Test suite for diffbot-java-sdk.
  * 
  * @author Pierre-Denis Vanduynslager <pierre.denis.vanduynslager@gmail.com>
  */

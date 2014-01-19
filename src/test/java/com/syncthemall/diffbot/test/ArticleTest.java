@@ -30,8 +30,8 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotServerException;
 import com.syncthemall.diffbot.model.article.Article;
 
 /**
@@ -60,9 +60,14 @@ public class ArticleTest extends DiffbotTest {
 	 * 
 	 * @throws DiffbotException means the test is failed
 	 */
-	@Test(expected = DiffbotServerException.class)
+	@Test
 	public final void testMalFormedURL() throws DiffbotException {
-		diffbot.article().analyze(malFormedTestURL).execute();
+		try {
+			diffbot.article().analyze(malFormedTestURL).execute();
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertNotNull(e.getMessage());
+		}
 	}
 
 	/**
@@ -70,9 +75,14 @@ public class ArticleTest extends DiffbotTest {
 	 * 
 	 * @throws DiffbotException means the test is failed
 	 */
-	@Test(expected = DiffbotServerException.class)
+	@Test
 	public final void testNonExistingURL() throws DiffbotException {
+		try {
 		diffbot.article().analyze(nonExixtingTestURL).execute();
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertNotNull(e.getMessage());
+		}
 	}
 
 }

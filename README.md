@@ -22,7 +22,7 @@ The easiest way to incorporate the SDK into your Java project is to use Maven. S
 <dependency>
     <groupId>com.syncthemall</groupId>
 	<artifactId>diffbot-java-sdk</artifactId>
-	<version>1.2.0</version>
+	<version>1.2.1</version>
 </dependency>
 ```
 
@@ -116,7 +116,6 @@ Future<Products> fProducts = api.products().analyze("<web page URL>").queue();
 Future<Classified> fClassified = api.classified().analyze("<web page URL>").queue();
 ```
 
-Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
 At this point no call has been done to Diffbot. To obtain the results:
 ```java
 Article article = fArticle.get();
@@ -126,20 +125,26 @@ Products products = fProducts.get();
 Classified classified = fClassified.get();
 ```
 
-The first line trigger a batch request that retrieves the results for all the requests added since the last call to `Future#get()`. The second line doesn't need to do any API call as the result was retrieve during the
-execution of the fist line.
+The first line trigger one or more batch request (depending the concurrentBatchRequest value) that retrieves the results for up to (concurrentBatchRequest * maxBatchRequest) requests added since the last call to `Future#get()`.
+The second line doesn't need to do any API call if the result was retrieved during the execution of the fist line.
+
+Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
 
 Running the JUnit tests
 -----------------------
 In order to run the JUnit test add to your Maven settings.xml
 ```xml
 <properties>
-	<diffbot.key>0813abb2bfc05b5ea878e68848861259</diffbot.key>
+	<diffbot.key><your API key></diffbot.key>
 </properties>
 ```
 
 Change log
 ----------
+### 1.2.1
+  * Error management improvement
+  * Added the possibility to do multiple concurrent request to batch API
+
 ### 1.2.0
   * Added Image API
   * Added Product API

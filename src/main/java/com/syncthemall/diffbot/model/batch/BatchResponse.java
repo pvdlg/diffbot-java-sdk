@@ -40,40 +40,9 @@ public final class BatchResponse extends GenericJson implements Serializable {
 	@Key
 	private String body;
 	@Key
-	private Header[] headers;
-	@Key
 	private int code;
 	@Key(value = "relative_url")
 	private String relativeUrl;
-
-	/**
-	 * Gets the first header with the given name.
-	 * 
-	 * <p>
-	 * Header name comparison is case insensitive.
-	 * 
-	 * @param name the name of the header to get
-	 * @return the first header or <code>null</code>
-	 */
-	public Header getFirstHeader(final String name) {
-		for (int i = 0; i < headers.length; i++) {
-			final Header header = headers[i];
-			if (header.getName() != null && header.getName().equalsIgnoreCase(name)) {
-				return header;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @return the {@code Header}s for the this {@code BatchResponse}
-	 */
-	public Header[] getHeaders() {
-		if (headers != null) {
-		return headers.clone();
-		}
-		return new Header[0];
-	}
 
 	/**
 	 * @return the body content of the response

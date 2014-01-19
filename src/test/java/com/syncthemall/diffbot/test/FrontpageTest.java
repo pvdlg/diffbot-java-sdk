@@ -31,8 +31,8 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;
-import com.syncthemall.diffbot.exception.DiffbotServerException;
 import com.syncthemall.diffbot.model.frontpage.Frontpage;
 
 /**
@@ -67,13 +67,18 @@ public class FrontpageTest extends DiffbotTest {
 	}
 
 	/**
-	 * Test a frontpage call with a malformed URL. Should throw a {@code DiffbotServerException}.
+	 * Test a frontpage call with a malformed URL. Should throw a {@code DiffbotAPIException}.
 	 * 
 	 * @throws DiffbotException means the test is failed
 	 */
-	@Test(expected = DiffbotServerException.class)
+	@Test
 	public final void testMalFormedTURL() throws DiffbotException {
-		diffbot.frontpage().analyze(malFormedTestURL).execute();
+		try {
+			diffbot.frontpage().analyze(malFormedTestURL).execute();
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertNotNull(e.getMessage());
+		}
 	}
 
 	/**
@@ -89,8 +94,9 @@ public class FrontpageTest extends DiffbotTest {
 		try {
 			Frontpage frontpage = diffbot.frontpage().analyze(nonExixtingTestURL).execute();
 			assertNull("Frontpage API shouldn't return items with a non existing URL", frontpage.getItems());
-		} catch (DiffbotServerException e) {
-			// This is expected...sort of
+		} catch (DiffbotAPIException e) {
+			assertNotEquals(0, e.getErrorCode());
+			assertNotNull(e.getMessage());
 		}
 	}
 

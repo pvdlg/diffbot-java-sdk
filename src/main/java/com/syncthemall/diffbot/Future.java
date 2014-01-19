@@ -23,6 +23,7 @@
 package com.syncthemall.diffbot;
 
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
+import com.syncthemall.diffbot.exception.DiffbotBatchException;
 import com.syncthemall.diffbot.exception.DiffbotException;
 import com.syncthemall.diffbot.exception.DiffbotParseException;
 import com.syncthemall.diffbot.exception.DiffbotServerException;
@@ -70,16 +71,13 @@ public class Future<T extends Model> {
 
 	protected final Future<T> setResult(final Model result) {
 		this.result = result;
-		return this;
-	}
-
-	protected final Future<T> setExecuted(final boolean executed) {
-		this.executed = executed;
+		this.executed = true;
 		return this;
 	}
 
 	protected final Future<T> setError(final DiffbotException error) {
 		this.error = error;
+		this.executed = true;
 		return this;
 	}
 
@@ -93,9 +91,14 @@ public class Future<T extends Model> {
 	 * {@code Future}.
 	 * 
 	 * @return the {@code Article} or {@code Frontpage} obtained for this {@code Future}
-	 * @throws DiffbotUnauthorizedException if the developer token is not recognized or revoked
-	 * @throws DiffbotServerException if a HTTP error occurs on the Diffbot server
-	 * @throws DiffbotAPIException if an API error occur on Diffbot servers while processing the request
+	 * @throws DiffbotBatchException if an error happens in the batch request call itself (wraps any error that occurs
+	 *             during the batch API call)
+	 * @throws DiffbotUnauthorizedException if the developer token is not recognized or revoked for the sub-request
+	 *             associated to this {@code Future}
+	 * @throws DiffbotServerException if a HTTP error occurs on the Diffbot server for the sub-request associated to
+	 *             this {@code Future}
+	 * @throws DiffbotAPIException if an API error occur on Diffbot servers while processing the request for the
+	 *             sub-request associated to this {@code Future}
 	 * @throws DiffbotException for any other unknown errors. This is also a superclass of all other Diffbot exceptions,
 	 *             so you may want to only catch this exception if not interested in the cause of the error.
 	 */

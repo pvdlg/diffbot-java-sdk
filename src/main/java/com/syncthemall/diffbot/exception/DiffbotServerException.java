@@ -32,28 +32,12 @@ public class DiffbotServerException extends DiffbotException {
 
 	/** Serial code version <code>serialVersionUID</code>. **/
 	private static final long serialVersionUID = 7905062136219550521L;
-	private final int errorCode;
-
-	/**
-	 * Constructs a new exception with the specified error code and detail message. The cause is not initialized, and
-	 * may subsequently be initialized by a call to {@link #initCause}.
-	 * 
-	 * @param errorCode HTTP error code
-	 * @param message the detail message. The detail message is saved for later retrieval by the {@link #getMessage()}
-	 *            method.
-	 */
-	public DiffbotServerException(final int errorCode, final String message) {
-		super(message);
-		this.errorCode = errorCode;
-	}
 
 	/**
 	 * Constructs a new exception with the specified detail message and cause.
 	 * <p>
 	 * Note that the detail message associated with {@code cause} is <i>not</i> automatically incorporated in this
 	 * exception's detail message.
-	 * <p>
-	 * The error code is not initialized and will have the default value 0.
 	 * 
 	 * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method).
 	 * @param cause the cause (which is saved for later retrieval by the {@link #getCause()} method). (A <tt>null</tt>
@@ -61,15 +45,6 @@ public class DiffbotServerException extends DiffbotException {
 	 */
 	public DiffbotServerException(final String message, final Throwable cause) {
 		super(message, cause);
-		this.errorCode = 0;
-	}
-
-	/**
-	 * @return the HTTP error associated with the exception or 0 for non HTTP errors (ie impossible to connect to the
-	 *         server or a read timeout)
-	 */
-	public final int getErrorCode() {
-		return errorCode;
 	}
 
 }
