@@ -125,7 +125,8 @@ Products products = fProducts.get();
 Classified classified = fClassified.get();
 ```
 
-The first line trigger one or more batch request (depending the concurrentBatchRequest value) that retrieves the results for up to (concurrentBatchRequest * maxBatchRequest) requests added since the last call to `Future#get()`.
+The first line trigger one or more batch request (depending the concurrentBatchRequest value) that retrieves the results for up to value
+set to'Diffbot.setConcurrentBatchRequest(<int value>)' * value set to 'Diffbot.setMaxBatchRequest(<int value>)' requests added since the last call to `Future#get()`.
 The second line doesn't need to do any API call if the result was retrieved during the execution of the fist line.
 
 Note that this can be done concurrently by multiple threads. The Diffbot class is fully thread-safe.
