@@ -176,31 +176,5 @@ License
 The project is licensed under the MIT license. 
 See LICENSE for details.
 
-Disclamer
----------
-The Diffbot API currently present some "non-standard", "uneasy to deal with" specificities. The SDK work around this problems, but in some cases it might create unexpected issues.
-
-### Article API: Errors management
-Once requested the Article API return an HTTP response with headers, a status code, and a JSON content.
-Usually REST API returns an HTTP response with a status code indicating to the client (SDK) how the request was processed by the API, and if there is some error. This way a client can parse the JSON as a regular object if the error code is `200` and as an error object otherwise.
-Diffbot always answers a `200` status code, which mean there is no way for the SDK to knows if the JSON content represents an error object or an `Article` object.
-
-*The SDK work around this problem by looking for an error code ins the JSON content be fore parsing.*
-
-### Frontpage API: JSON structure impossible to parse
-The Frontpage API can return either an XML or a JSON response. Unfortunatly the JSON message returned by the Frontpage API is not parsable.
-
-*The SDK uses the API with XML format an unmarshall with JAXB. That creates a dependency to JAXB (it is included in the JDK though).*
-
-### Frontpage API: Errors management
-The Frontpage API presents the same issue with error management as the Article API (status code always 200).
-In addition, the frontpage API return an JSON message when an error occurs even if the XML format has been requested.
-
-*To workaround this problem the SDK test the content type of the http response. If it's XML it's JSON then the content is mapped to an error object.*
-
-The error management for the Frontpage API seems inconsistent. When requesting the Frontpage API with a inaccessible URL sometimes Diffbot return avalid XML response with the attribute title = URL, sometimes the title is "404 not found" and sometimes an error 500 is return. All these different cases happens with the same url in parameter.
-Therefore there is no way for the SDK to know if there was an error in the API.
-*If an error happens on the API side, a `Frontpage` object will be return with the error message in the title attribute.*
-
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/vanduynslagerp/diffbot-java-sdk/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
