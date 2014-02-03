@@ -22,7 +22,7 @@ The easiest way to incorporate the SDK into your Java project is to use Maven. S
 <dependency>
     <groupId>com.syncthemall</groupId>
 	<artifactId>diffbot-java-sdk</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 </dependency>
 ```
 
@@ -105,7 +105,6 @@ if (classified.getType().equals(PageType.ARTICLE)) {
 The batch API allows to prepare multiple Article, Frontpage, Image, Product and/or Classifier request and to send them all at once. The batch API:
  * limits the number of API calls and reduces the network load, by avoiding http overhead for every request
  * slightly improve the performances if a lot of requests are executed
- * limits the usage of the Diffbot quota
 
 To prepare requests to be executed in batch:
 ```java
@@ -142,6 +141,9 @@ In order to run the JUnit test add to your Maven settings.xml
 
 Change log
 ----------
+### 1.2.2
+  * Fixed a bug with multi-thread on batch API 
+  
 ### 1.2.1
   * Error management improvement
   * Added the possibility to do multiple concurrent request to batch API

@@ -50,6 +50,7 @@ import com.syncthemall.diffbot.model.frontpage.Frontpage;
  */
 public class Future<T extends Model> {
 
+	private Diffbot client;
 	private DiffbotRequest<T> request;
 	private Model result;
 	private DiffbotException error;
@@ -59,10 +60,12 @@ public class Future<T extends Model> {
 	 * Default constructor.
 	 * 
 	 * @param request {@code Request} used to call the Diffbot API and obtain a result
+	 * @param client the {@code Diffbot} client that initiated this {@code Future}
 	 */
-	protected Future(final DiffbotRequest<T> request) {
+	protected Future(final DiffbotRequest<T> request, final Diffbot client) {
 		super();
 		this.request = request;
+		this.client = client;
 	}
 
 	protected final DiffbotRequest<T> getRequest() {
@@ -102,11 +105,23 @@ public class Future<T extends Model> {
 	 * @throws DiffbotException for any other unknown errors. This is also a superclass of all other Diffbot exceptions,
 	 *             so you may want to only catch this exception if not interested in the cause of the error.
 	 */
-	@SuppressWarnings("unchecked")
 	public final T get() throws DiffbotException {
-		if (!executed) {
-			request.runBatch(this);
+		if (executed) {
+			return getResult();
+		} else {
+			synchronized (client) {
+				if (!executed) {
+					request.runBatch(this);
+					return getResult();
+				} else {
+					return getResult();
+				}
+			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private final T getResult() throws DiffbotException {
 		if (error != null) {
 			if (error instanceof DiffbotAPIException) {
 				throw (DiffbotAPIException) error;

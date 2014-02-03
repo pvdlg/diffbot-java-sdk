@@ -40,17 +40,14 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.json.GenericJson;
-import com.google.api.client.json.JsonFactory;
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotBatchException;
 import com.syncthemall.diffbot.exception.DiffbotException;
@@ -77,11 +74,8 @@ import com.syncthemall.diffbot.model.products.Products;
  */
 public abstract class DiffbotRequest<T extends Model> {
 
+	private Diffbot client;
 	private ResourceBundle bundle = ResourceBundle.getBundle("com.syncthemall.diffbot.messages.Messages");
-	private HttpRequestFactory requestFactory;
-	private List<Future<? extends Model>> futures;
-	private JAXBContext jc;
-	private JsonFactory jsonFactory;
 	private Class<T> responseClass;
 	private int maxBatchRequest;
 	private int readTimeout = 20000;
@@ -114,10 +108,7 @@ public abstract class DiffbotRequest<T extends Model> {
 	 */
 	public DiffbotRequest(final Diffbot client, final Class<T> responseClass, final String encodedUrl) {
 		super();
-		this.requestFactory = client.getRequestFactory();
-		this.jc = client.getJAXBContext();
-		this.jsonFactory = client.getJsonFactory();
-		this.futures = client.getFutures();
+		this.client = client;
 		this.responseClass = responseClass;
 		this.maxBatchRequest = client.getMaxBatchRequest();
 		this.batchRequestTimeout = client.getBatchRequestTimeout();
@@ -155,7 +146,7 @@ public abstract class DiffbotRequest<T extends Model> {
 	 */
 	public final T execute() throws DiffbotException {
 		try {
-			HttpRequest request = requestFactory.buildGetRequest(this.url);
+			HttpRequest request = client.getRequestFactory().buildGetRequest(this.url);
 			request.setReadTimeout(readTimeout);
 			HttpResponse response = request.execute();
 			// Specific case for Frontpage has the response is either in JSON (error case) or XML (success case)
@@ -198,9 +189,9 @@ public abstract class DiffbotRequest<T extends Model> {
 	 * @return a {@code Future<T>} that will be filled with the result {@code Model} on the next batch call
 	 */
 	public final Future<T> queue() {
-		Future<T> future = new Future<T>(this);
-		synchronized (futures) {
-			futures.add(future);
+		Future<T> future = new Future<T>(this, client);
+		synchronized (client.getFutures()) {
+			client.getFutures().add(future);
 		}
 		return future;
 	}
@@ -226,14 +217,15 @@ public abstract class DiffbotRequest<T extends Model> {
 	}
 
 	private void runSyncBatch(final Future<T> initiator) throws DiffbotBatchException {
-		if (futures.contains(initiator)) {
+		if (client.getFutures().contains(initiator)) {
 			List<Future<? extends Model>> batchList = new ArrayList<Future<? extends Model>>();
-			synchronized (futures) {
+			synchronized (client.getFutures()) {
 				batchList.add(initiator);
-				futures.remove(initiator);
-				int batchSize = (futures.size() > maxBatchRequest - 1) ? maxBatchRequest - 1 : futures.size();
+				client.getFutures().remove(initiator);
+				int batchSize = (client.getFutures().size() > maxBatchRequest - 1) ? maxBatchRequest - 1 : client
+						.getFutures().size();
 
-				List<Future<? extends Model>> subList = futures.subList(0, batchSize);
+				List<Future<? extends Model>> subList = client.getFutures().subList(0, batchSize);
 				batchList.addAll(subList);
 				subList.clear();
 			}
@@ -243,30 +235,32 @@ public abstract class DiffbotRequest<T extends Model> {
 				parseBatchSubResponses(responses, batchList);
 			} catch (DiffbotUnauthorizedException | DiffbotServerException | DiffbotParseException
 					| DiffbotAPIException e) {
-				synchronized (futures) {
-					futures.addAll(batchList);
+				synchronized (client.getFutures()) {
+					client.getFutures().addAll(batchList);
 				}
 				throw new DiffbotBatchException(e);
 			}
 		}
 	}
-	
+
 	private void runAsyncBatch(final Future<T> initiator) throws DiffbotBatchException {
 		List<List<Future<? extends Model>>> batchCalls = new ArrayList<List<Future<? extends Model>>>();
 		int callsToMake = 0;
-		synchronized (futures) {
-			futures.remove(initiator);
-			int batchSize = (futures.size() > maxBatchRequest - 1) ? maxBatchRequest - 1 : futures.size();
-			List<Future<? extends Model>> subList = futures.subList(0, batchSize);
+		synchronized (client.getFutures()) {
+			client.getFutures().remove(initiator);
+			int batchSize = (client.getFutures().size() > maxBatchRequest - 1) ? maxBatchRequest - 1 : client
+					.getFutures().size();
+			List<Future<? extends Model>> subList = client.getFutures().subList(0, batchSize);
 			subList.add(initiator);
 			List<Future<? extends Model>> batchList = new ArrayList<Future<? extends Model>>();
 			batchList.addAll(subList);
 			batchCalls.add(batchList);
 			callsToMake++;
 			subList.clear();
-			while (!futures.isEmpty() && callsToMake < concurrentBatchRequest) {
-				batchSize = (futures.size() > maxBatchRequest) ? maxBatchRequest : futures.size();
-				subList = futures.subList(0, batchSize);
+			while (!client.getFutures().isEmpty() && callsToMake < concurrentBatchRequest) {
+				batchSize = (client.getFutures().size() > maxBatchRequest) ? maxBatchRequest : client.getFutures()
+						.size();
+				subList = client.getFutures().subList(0, batchSize);
 				batchList = new ArrayList<Future<? extends Model>>();
 				batchList.addAll(subList);
 				batchCalls.add(batchList);
@@ -281,8 +275,8 @@ public abstract class DiffbotRequest<T extends Model> {
 			try {
 				asyncResponses.put(call, executeBatchAsyncRequest(call));
 			} catch (DiffbotServerException | DiffbotParseException e) {
-				synchronized (futures) {
-					futures.addAll(call);
+				synchronized (client.getFutures()) {
+					client.getFutures().addAll(call);
 				}
 				if (call.contains(initiator)) {
 					errorOnInitiator = new DiffbotBatchException(e);
@@ -296,20 +290,21 @@ public abstract class DiffbotRequest<T extends Model> {
 				BatchResponse[] responses = parseBatchResponse(entry.getValue().get());
 				parseBatchSubResponses(responses, entry.getKey());
 			} catch (DiffbotParseException | InterruptedException e) {
-				synchronized (futures) {
-					futures.addAll(entry.getKey());
+				synchronized (client.getFutures()) {
+					client.getFutures().addAll(entry.getKey());
 				}
 				if (entry.getKey().contains(initiator)) {
 					errorOnInitiator = new DiffbotBatchException(e);
 				}
 			} catch (ExecutionException e) {
-				synchronized (futures) {
-					futures.addAll(entry.getKey());
+				synchronized (client.getFutures()) {
+					client.getFutures().addAll(entry.getKey());
 				}
 				if (entry.getKey().contains(initiator)) {
 					if (e.getCause() instanceof HttpResponseException) {
 						try {
-							parseAPIError(((HttpResponseException) e.getCause()).getStatusCode(), ((HttpResponseException) e.getCause()).getContent());
+							parseAPIError(((HttpResponseException) e.getCause()).getStatusCode(),
+									((HttpResponseException) e.getCause()).getContent());
 						} catch (DiffbotUnauthorizedException | DiffbotParseException | DiffbotAPIException e1) {
 							errorOnInitiator = new DiffbotBatchException(e1);
 						}
@@ -327,7 +322,7 @@ public abstract class DiffbotRequest<T extends Model> {
 	private HttpResponse executeBatchRequest(final Collection<Future<? extends Model>> futureRequests)
 			throws DiffbotParseException, DiffbotServerException, DiffbotUnauthorizedException, DiffbotAPIException {
 		try {
-			HttpRequest request = requestFactory.buildPostRequest(buildBatchRequest(futureRequests), null);
+			HttpRequest request = client.getRequestFactory().buildPostRequest(buildBatchRequest(futureRequests), null);
 			request.setReadTimeout(batchRequestTimeout);
 			return request.execute();
 		} catch (HttpResponseException e) {
@@ -337,19 +332,19 @@ public abstract class DiffbotRequest<T extends Model> {
 			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
 		}
 	}
-	
+
 	private java.util.concurrent.Future<HttpResponse> executeBatchAsyncRequest(
 			final Collection<Future<? extends Model>> futureRequests) throws DiffbotParseException,
 			DiffbotServerException {
 		try {
-			HttpRequest request = requestFactory.buildPostRequest(buildBatchRequest(futureRequests), null);
+			HttpRequest request = client.getRequestFactory().buildPostRequest(buildBatchRequest(futureRequests), null);
 			request.setReadTimeout(batchRequestTimeout);
 			return request.executeAsync();
 		} catch (IOException e) {
 			throw new DiffbotServerException(bundle.getString("request.not.executed"), e);
 		}
 	}
-	
+
 	private GenericUrl buildBatchRequest(final Collection<Future<? extends Model>> futureRequests)
 			throws DiffbotParseException {
 		List<BatchRequest> requests = new ArrayList<BatchRequest>();
@@ -363,7 +358,7 @@ public abstract class DiffbotRequest<T extends Model> {
 
 	private String buildBatchQuery(final List<BatchRequest> requests) throws DiffbotParseException {
 		try {
-			return jsonFactory.toString(requests);
+			return client.getJsonFactory().toString(requests);
 		} catch (IOException e) {
 			throw new DiffbotParseException(bundle.getString("batch.request.not.built"), e);
 		}
@@ -405,13 +400,15 @@ public abstract class DiffbotRequest<T extends Model> {
 		try {
 			Model model;
 			if (result.getRequest().getApiType() == ApiType.ARTICLE) {
-				model = jsonFactory.createJsonParser(response.getBody()).parseAndClose(Article.class, null);
+				model = client.getJsonFactory().createJsonParser(response.getBody()).parseAndClose(Article.class, null);
 			} else if (result.getRequest().getApiType() == ApiType.IMAGE) {
-				model = jsonFactory.createJsonParser(response.getBody()).parseAndClose(Images.class, null);
+				model = client.getJsonFactory().createJsonParser(response.getBody()).parseAndClose(Images.class, null);
 			} else if (result.getRequest().getApiType() == ApiType.PRODUCT) {
-				model = jsonFactory.createJsonParser(response.getBody()).parseAndClose(Products.class, null);
+				model = client.getJsonFactory().createJsonParser(response.getBody())
+						.parseAndClose(Products.class, null);
 			} else if (result.getRequest().getApiType() == ApiType.CLASSIFIER) {
-				model = jsonFactory.createJsonParser(response.getBody()).parseAndClose(Classified.class, null);
+				model = client.getJsonFactory().createJsonParser(response.getBody())
+						.parseAndClose(Classified.class, null);
 			} else {
 				throw new UnknownRequestAPITypeException(bundle.getString("batch.unknow.type"), result.getRequest()
 						.getApiType());
@@ -434,7 +431,7 @@ public abstract class DiffbotRequest<T extends Model> {
 
 	private Unmarshaller createUnmarshaller() {
 		try {
-			return jc.createUnmarshaller();
+			return client.getJAXBContext().createUnmarshaller();
 		} catch (JAXBException e) {
 			throw new JAXBInitializationException(bundle.getString("jaxb.not.instanciated"), e);
 		}
@@ -446,7 +443,7 @@ public abstract class DiffbotRequest<T extends Model> {
 			throw new DiffbotUnauthorizedException(bundle.getString("token.not.authorized"));
 		} else {
 			try {
-				throw new DiffbotAPIException(statusCode, jsonFactory.createJsonParser(responseContent)
+				throw new DiffbotAPIException(statusCode, client.getJsonFactory().createJsonParser(responseContent)
 						.parse(GenericJson.class).get(ERROR).toString());
 			} catch (IOException e) {
 				throw new DiffbotParseException(bundle.getString("error.not.parsed"), e);

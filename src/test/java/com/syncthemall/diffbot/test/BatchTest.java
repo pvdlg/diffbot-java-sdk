@@ -38,9 +38,6 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
-import com.syncthemall.diffbot.Diffbot;
 import com.syncthemall.diffbot.Future;
 import com.syncthemall.diffbot.exception.DiffbotAPIException;
 import com.syncthemall.diffbot.exception.DiffbotException;

@@ -4,7 +4,7 @@
 	<groupId>com.syncthemall</groupId>
 	<artifactId>diffbot-java-sdk</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<name>diffbot-java-sdk</name>
 	<inceptionYear>2013</inceptionYear>
 	<url>https://github.com/vanduynslagerp/diffbot-java-sdk</url>
@@ -75,6 +75,14 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 					<source>${source.version}</source>
 					<target>${source.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
